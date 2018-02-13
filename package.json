@@ -1,0 +1,23 @@
+{
+  "name": "serverless-demo-app",
+  "author": "Jakub Matejka <jakub@keboola.com>",
+  "license": "MIT",
+  "version": "1.0.0",
+  "description": "Sample Serverless App",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/keboola/serverless-demo-app.git"
+  },
+  "dependencies": {
+    "@keboola/serverless-request-handler": "^1.1.1",
+    "bluebird": "^3.4.7",
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "@keboola/serverless-papertrail-logging": "^1.0.4",
+    "aws-sdk": "^2.49.0",
+    "mocha": "^4.1.0",
+    "serverless": "^1.26.0",
+    "unexpected": "^10.36.2"
+  }
+}

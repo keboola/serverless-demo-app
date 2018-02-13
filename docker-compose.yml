@@ -1,0 +1,114 @@
+version: "2"
+
+services:
+
+  dev-deploy:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/code
+    working_dir: /code
+    environment:
+      - "AWS_ACCESS_KEY_ID=${DEV_DEPLOY_AWS_ACCESS_KEY_ID}"
+      - "AWS_SECRET_ACCESS_KEY=${DEV_DEPLOY_AWS_SECRET_ACCESS_KEY}"
+      - "KEBOOLA_STACK=${DEV_KEBOOLA_STACK}"
+      - "PAPERTRAIL_PORT=${DEV_PAPERTRAIL_PORT}"
+      - "REGION=${DEV_REGION}"
+      - "SERVICE_NAME=${DEV_SERVICE_NAME}"
+      - "STAGE=dev"
+    command: >
+             sh -c '
+             serverless deploy
+             '
+  ci-deploy:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - "AWS_ACCESS_KEY_ID=${CI_DEPLOY_AWS_ACCESS_KEY_ID}"
+      - "AWS_SECRET_ACCESS_KEY=${CI_DEPLOY_AWS_SECRET_ACCESS_KEY}"
+      - "KEBOOLA_STACK=${CI_KEBOOLA_STACK}"
+      - "PAPERTRAIL_PORT=${CI_PAPERTRAIL_PORT}"
+      - "REGION=${CI_REGION}"
+      - "SERVICE_NAME=${CI_SERVICE_NAME}"
+      - "STAGE=test"
+    command: >
+             sh -c '
+             serverless deploy
+             '
+
+  prod-deploy:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - "AWS_ACCESS_KEY_ID=${PROD_DEPLOY_AWS_ACCESS_KEY_ID}"
+      - "AWS_SECRET_ACCESS_KEY=${PROD_DEPLOY_AWS_SECRET_ACCESS_KEY}"
+      - "KEBOOLA_STACK=${PROD_KEBOOLA_STACK}"
+      - "PAPERTRAIL_PORT=${PROD_PAPERTRAIL_PORT}"
+      - "REGION=${PROD_REGION}"
+      - "SERVICE_NAME=${PROD_SERVICE_NAME}"
+      - "STAGE=prod"
+    command: >
+             sh -c '
+             serverless deploy
+             '
+
+  dev-test-app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/code
+    working_dir: /code
+    environment:
+      - "AWS_ACCESS_KEY_ID=accessKey"
+      - "AWS_SECRET_ACCESS_KEY=secretKey"
+      - "REGION=us-east-1"
+    command: >
+             sh -c '
+             ./node_modules/.bin/mocha --timeout 0 test/handler.js
+             '
+
+  dev-test-func:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/code
+    working_dir: /code
+    environment:
+      - "AWS_ACCESS_KEY_ID=${DEV_TEST_AWS_ACCESS_KEY_ID}"
+      - "AWS_SECRET_ACCESS_KEY=${DEV_TEST_AWS_SECRET_ACCESS_KEY}"
+      - "REGION=${DEV_REGION}"
+    command: >
+             sh -c '
+             ./node_modules/.bin/mocha --timeout 0 test/func.js
+             '
+
+  ci-test-app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - "AWS_ACCESS_KEY_ID=accessKey"
+      - "AWS_SECRET_ACCESS_KEY=secretKey"
+      - "REGION=us-east-1"
+    command: >
+             sh -c '
+             ./node_modules/.bin/mocha --timeout 0 test/handler.js
+             '
+
+  ci-test-func:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - "AWS_ACCESS_KEY_ID=${CI_TEST_AWS_ACCESS_KEY_ID}"
+      - "AWS_SECRET_ACCESS_KEY=${CI_TEST_AWS_SECRET_ACCESS_KEY}"
+      - "REGION=${CI_REGION}"
+    command: >
+             sh -c '
+             ./node_modules/.bin/mocha --timeout 0 test/func.js
+             '

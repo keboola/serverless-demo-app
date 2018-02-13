@@ -1,0 +1,26 @@
+sudo: required
+
+language: bash
+
+services:
+  - docker
+
+before_script:
+  - docker -v
+  - docker-compose -v
+  - docker-compose build
+
+script:
+  - docker-compose run --rm ci-test-app
+  - docker-compose run --rm ci-deploy
+  - docker-compose run --rm ci-test-func
+
+after_success:
+  - docker images
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: docker-compose run --rm prod-deploy
+  on:
+    tags: true

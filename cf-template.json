@@ -1,0 +1,374 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Serverless Demo App - creates IAM Group for deployment with scoped permissions. Assign this group to ci/deploy user.",
+  "Parameters": {
+    "KeboolaStack": {
+      "Type": "String",
+      "Description": "IAM Policy and Group for Serverless Deploy"
+    },
+    "ServiceName": {
+      "Type": "String",
+      "Description": "Service name"
+    },
+    "Stage": {
+      "Type": "String",
+      "Description": "Service stage",
+      "AllowedValues": [
+        "dev",
+        "test",
+        "prod"
+      ]
+    }
+  },
+  "Resources": {
+    "ServerlessDeployPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "ServiceName"
+              },
+              "deploy-policy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:CreateUploadBucket",
+                "cloudformation:DeleteStack",
+                "cloudformation:DescribeStackEvents",
+                "cloudformation:DescribeStackResource",
+                "cloudformation:DescribeStackResources",
+                "cloudformation:ListStackResources",
+                "cloudformation:UpdateStack",
+                "cloudformation:DescribeStacks",
+                "cloudformation:SetStackPolicy"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:cloudformation:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":stack/",
+                      {
+                        "Ref": "ServiceName"
+                      },
+                      "-",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "/*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:cloudformation:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":stack/",
+                      {
+                        "Ref": "ServiceName"
+                      },
+                      "-",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "-*/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:*"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "ServiceName"
+                      },
+                      "-*/*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "ServiceName"
+                      },
+                      "-*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "lambda:*"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:lambda:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":function:",
+                      {
+                        "Ref": "ServiceName"
+                      },
+                      "-",
+                      {
+                        "Ref": "Stage"
+                      },
+                      "-*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "apigateway:*"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "::/restapis"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "::/restapis/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:PassRole",
+                "iam:DeleteRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":role/",
+                      {
+                        "Ref": "ServiceName"
+                      },
+                      "-role"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "iam:UpdateAssumeRolePolicy"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":role/",
+                      {
+                        "Ref": "ServiceName"
+                      },
+                      "-*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "events:*",
+                "logs:*",
+                "cloudwatch:*",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeVpcs",
+                "ec2:DescribeAccountAttributes",
+                "iam:GetUser",
+                "iam:GetRole",
+                "iam:AttachRolePolicy",
+                "cloudformation:ValidateTemplate",
+                "s3:ListAllMyBuckets"
+              ],
+              "Resource": [
+                "*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ServerlessDeployGroup": {
+      "Type": "AWS::IAM::Group",
+      "Properties": {
+        "GroupName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "ServiceName"
+              },
+              "deploy-group"
+            ]
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Ref": "ServerlessDeployPolicy"
+          }
+        ],
+        "Path": "/"
+      }
+    },
+    "FunctionalTestPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "ServiceName"
+              },
+              "tests-policy"
+            ]
+          ]
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "lambda:*"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:lambda:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":function:",
+                      {
+                        "Ref": "ServiceName"
+                      },
+                      "-*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "FunctionalTestGroup": {
+      "Type": "AWS::IAM::Group",
+      "Properties": {
+        "GroupName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "ServiceName"
+              },
+              "tests-group"
+            ]
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Ref": "FunctionalTestPolicy"
+          }
+        ],
+        "Path": "/"
+      }
+    }
+  }
+}
