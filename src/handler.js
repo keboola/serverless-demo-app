@@ -1,7 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
-const { UserError, RequestHandler } = require('@keboola/serverless-request-handler');
+const { RequestHandler } = require('@keboola/serverless-request-handler');
 
 module.exports.handler = (event, context, callback) => RequestHandler.handler(() => {
   const promise = new Promise(res => res('OK'));

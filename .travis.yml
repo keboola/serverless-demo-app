@@ -12,6 +12,8 @@ before_script:
 
 jobs:
   include:
+    - stage: lint
+      script: docker-compose run --rm ci-test-app ./node_modules/.bin/eslint .
     - stage: unit test
       script: docker-compose run --rm ci-test-app
     - stage: deploy ci
