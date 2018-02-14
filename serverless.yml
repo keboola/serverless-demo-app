@@ -1,11 +1,14 @@
-service: "${env:SERVICE_NAME}"
+service: ${env:SERVICE_NAME}
 
 custom:
+  webpackIncludeModules: true
   papertrail:
     port: ${env:PAPERTRAIL_PORT}
 
 plugins:
   - '@keboola/serverless-papertrail-logging'
+  - '@keboola/serverless-default-error-responses'
+  - serverless-webpack
 
 provider:
   name: aws
@@ -15,6 +18,8 @@ provider:
   memorySize: 256
   timeout: 30
   versionFunctions: false
+  deploymentBucket:
+    name: "${env:SERVICE_NAME}-${env:REGION}-deployment"
   environment:
 
   role: appLambdaRole
@@ -22,6 +27,7 @@ provider:
     KeboolaStack: ${env:KEBOOLA_STACK}
 
 package:
+  individually: true
   include:
     - src/handler.js
     - node_modules/**

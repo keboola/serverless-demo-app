@@ -1,10 +1,10 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Serverless Demo App - creates IAM Group for deployment with scoped permissions. Assign this group to ci/deploy user.",
+  "Description": "AWS Stack for Serverless Demo App",
   "Parameters": {
     "KeboolaStack": {
       "Type": "String",
-      "Description": "IAM Policy and Group for Serverless Deploy"
+      "Description": "Stack name"
     },
     "ServiceName": {
       "Type": "String",
@@ -21,10 +21,10 @@
     }
   },
   "Resources": {
-    "ServerlessDeployPolicy": {
+    "ServerlessDeploymentPolicy": {
       "Type": "AWS::IAM::ManagedPolicy",
       "Properties": {
-        "Description": {
+        "ManagedPolicyName": {
           "Fn::Join": [
             "-",
             [
@@ -58,21 +58,13 @@
                     "",
                     [
                       "arn:aws:cloudformation:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
+                      { "Ref": "AWS::Region" },
                       ":",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
+                      { "Ref": "AWS::AccountId" },
                       ":stack/",
-                      {
-                        "Ref": "ServiceName"
-                      },
+                      { "Ref": "ServiceName" },
                       "-",
-                      {
-                        "Ref": "Stage"
-                      },
+                      { "Ref": "Stage" },
                       "/*"
                     ]
                   ]
@@ -82,21 +74,13 @@
                     "",
                     [
                       "arn:aws:cloudformation:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
+                      { "Ref": "AWS::Region" },
                       ":",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
+                      { "Ref": "AWS::AccountId" },
                       ":stack/",
-                      {
-                        "Ref": "ServiceName"
-                      },
+                      { "Ref": "ServiceName" },
                       "-",
-                      {
-                        "Ref": "Stage"
-                      },
+                      { "Ref": "Stage" },
                       "-*/*"
                     ]
                   ]
@@ -114,10 +98,10 @@
                     "",
                     [
                       "arn:aws:s3:::",
-                      {
-                        "Ref": "ServiceName"
-                      },
-                      "-*/*"
+                      { "Ref": "ServiceName" },
+                      "-",
+                      { "Ref": "AWS::Region" },
+                      "-deployment/*"
                     ]
                   ]
                 },
@@ -126,10 +110,10 @@
                     "",
                     [
                       "arn:aws:s3:::",
-                      {
-                        "Ref": "ServiceName"
-                      },
-                      "-*"
+                      { "Ref": "ServiceName" },
+                      "-",
+                      { "Ref": "AWS::Region" },
+                      "-deployment"
                     ]
                   ]
                 }
@@ -146,21 +130,13 @@
                     "",
                     [
                       "arn:aws:lambda:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
+                      { "Ref": "AWS::Region" },
                       ":",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
+                      { "Ref": "AWS::AccountId" },
                       ":function:",
-                      {
-                        "Ref": "ServiceName"
-                      },
+                      { "Ref": "ServiceName" },
                       "-",
-                      {
-                        "Ref": "Stage"
-                      },
+                      { "Ref": "Stage" },
                       "-*"
                     ]
                   ]
@@ -178,9 +154,7 @@
                     "",
                     [
                       "arn:aws:apigateway:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
+                      { "Ref": "AWS::Region" },
                       "::/restapis"
                     ]
                   ]
@@ -190,9 +164,7 @@
                     "",
                     [
                       "arn:aws:apigateway:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
+                      { "Ref": "AWS::Region" },
                       "::/restapis/*"
                     ]
                   ]
@@ -216,14 +188,10 @@
                     "",
                     [
                       "arn:aws:iam::",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
+                      { "Ref": "AWS::AccountId" },
                       ":role/",
-                      {
-                        "Ref": "ServiceName"
-                      },
-                      "-role"
+                      { "Ref": "ServiceName" },
+                      "-lambda-role"
                     ]
                   ]
                 }
@@ -240,13 +208,9 @@
                     "",
                     [
                       "arn:aws:iam::",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
+                      { "Ref": "AWS::AccountId" },
                       ":role/",
-                      {
-                        "Ref": "ServiceName"
-                      },
+                      { "Ref": "ServiceName" },
                       "-*"
                     ]
                   ]
@@ -277,24 +241,20 @@
         }
       }
     },
-    "ServerlessDeployGroup": {
+    "ServerlessDeploymentGroup": {
       "Type": "AWS::IAM::Group",
       "Properties": {
         "GroupName": {
           "Fn::Join": [
             "-",
             [
-              {
-                "Ref": "ServiceName"
-              },
+              { "Ref": "ServiceName" },
               "deploy-group"
             ]
           ]
         },
         "ManagedPolicyArns": [
-          {
-            "Ref": "ServerlessDeployPolicy"
-          }
+          { "Ref": "ServerlessDeploymentPolicy" }
         ],
         "Path": "/"
       }
@@ -302,13 +262,11 @@
     "FunctionalTestPolicy": {
       "Type": "AWS::IAM::ManagedPolicy",
       "Properties": {
-        "Description": {
+        "ManagedPolicyName": {
           "Fn::Join": [
             "-",
             [
-              {
-                "Ref": "ServiceName"
-              },
+              { "Ref": "ServiceName" },
               "tests-policy"
             ]
           ]
@@ -327,17 +285,11 @@
                     "",
                     [
                       "arn:aws:lambda:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
+                      { "Ref": "AWS::Region" },
                       ":",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
+                      { "Ref": "AWS::AccountId" },
                       ":function:",
-                      {
-                        "Ref": "ServiceName"
-                      },
+                      { "Ref": "ServiceName" },
                       "-*"
                     ]
                   ]
@@ -355,19 +307,45 @@
           "Fn::Join": [
             "-",
             [
-              {
-                "Ref": "ServiceName"
-              },
+              { "Ref": "ServiceName" },
               "tests-group"
             ]
           ]
         },
         "ManagedPolicyArns": [
-          {
-            "Ref": "FunctionalTestPolicy"
-          }
+          { "Ref": "FunctionalTestPolicy" }
         ],
         "Path": "/"
+      }
+    },
+    "ServerlessDeploymentS3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Join" : [
+            "-",
+            [
+              { "Ref": "ServiceName" },
+              { "Ref" : "AWS::Region" },
+              "deployment"
+            ]
+          ]
+        },
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "Id": "RemovalRule",
+              "Status": "Enabled",
+              "ExpirationInDays": "30"
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "KeboolaStack",
+            "Value": { "Ref": "KeboolaStack" }
+          }
+        ]
       }
     }
   }

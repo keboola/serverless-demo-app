@@ -79,9 +79,12 @@ services:
       - .:/code
     working_dir: /code
     environment:
+      - "API_ENDPOINT=${DEV_API_ENDPOINT}"
       - "AWS_ACCESS_KEY_ID=${DEV_TEST_AWS_ACCESS_KEY_ID}"
       - "AWS_SECRET_ACCESS_KEY=${DEV_TEST_AWS_SECRET_ACCESS_KEY}"
       - "REGION=${DEV_REGION}"
+      - "SERVICE_NAME=${DEV_SERVICE_NAME}"
+      - "STAGE=dev"
     command: >
              sh -c '
              ./node_modules/.bin/mocha --timeout 0 test/func.js
@@ -105,9 +108,12 @@ services:
       context: .
       dockerfile: ./Dockerfile
     environment:
+      - "API_ENDPOINT=${CI_API_ENDPOINT}"
       - "AWS_ACCESS_KEY_ID=${CI_TEST_AWS_ACCESS_KEY_ID}"
       - "AWS_SECRET_ACCESS_KEY=${CI_TEST_AWS_SECRET_ACCESS_KEY}"
       - "REGION=${CI_REGION}"
+      - "SERVICE_NAME=${CI_SERVICE_NAME}"
+      - "STAGE=test"
     command: >
              sh -c '
              ./node_modules/.bin/mocha --timeout 0 test/func.js
