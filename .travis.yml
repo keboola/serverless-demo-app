@@ -10,19 +10,18 @@ before_script:
   - docker-compose -v
   - docker-compose build
 
-jobs:
-  include:
-    - stage: lint
-      script: docker-compose run --rm ci-test-app ./node_modules/.bin/eslint .
-    - stage: unit test
-      script: docker-compose run --rm ci-test-app
-    - stage: deploy ci
-      script: docker-compose run --rm ci-deploy
-    - stage: functional test
-      script: docker-compose run --rm ci-test-func
-    - stage: deploy production
-      script: docker-compose run --rm prod-deploy
-      if: tag IS present
+script:
+  - docker-compose run --rm ci-test-app ./node_modules/.bin/eslint .
+  - docker-compose run --rm ci-test-app
+  - docker-compose run --rm ci-deploy
+  - docker-compose run --rm ci-test-func
 
 after_success:
   - docker images
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: docker-compose run --rm prod-deploy
+  on:
+    tags: true

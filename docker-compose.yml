@@ -68,7 +68,7 @@ services:
       - "REGION=us-east-1"
     command: >
              sh -c '
-             ./node_modules/.bin/mocha --timeout 0 test/handler.js
+             ./node_modules/.bin/mocha --timeout 0 --require babel-register --require source-map-support test/handler.js
              '
 
   dev-test-func:
@@ -87,7 +87,7 @@ services:
       - "STAGE=dev"
     command: >
              sh -c '
-             ./node_modules/.bin/mocha --timeout 0 test/func.js
+             ./node_modules/.bin/mocha --timeout 0 --require babel-register --require source-map-support test/func.js
              '
 
   ci-test-app:
@@ -100,7 +100,7 @@ services:
       - "REGION=us-east-1"
     command: >
              sh -c '
-             ./node_modules/.bin/mocha --timeout 0 test/handler.js
+             ./node_modules/.bin/mocha --timeout 0 --require babel-register --require source-map-support test/handler.js
              '
 
   ci-test-func:
@@ -116,5 +116,5 @@ services:
       - "STAGE=test"
     command: >
              sh -c '
-             ./node_modules/.bin/mocha --timeout 0 test/func.js
+             ./node_modules/.bin/mocha --timeout 0 --require babel-register --require source-map-support test/func.js
              '

@@ -2,6 +2,7 @@
 
 [![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
 [![Build Status](https://travis-ci.org/keboola/serverless-demo-app.svg)](https://travis-ci.org/keboola/serverless-demo-app)
+[![Maintainability](https://api.codeclimate.com/v1/badges/75829e3775f6c1905a14/maintainability)](https://codeclimate.com/github/keboola/serverless-demo-app/maintainability)
 
 A sample serverless app using AWS Lambda
 
@@ -12,13 +13,18 @@ A sample serverless app using AWS Lambda
 - AWS Lambda understands Node 6.1 only. Therefore we use Babel to compile source code during deployment which allows us to write the code in ES6.
 - The source code is bundled by Webpack during deployment. 
     - There is `source-map` support for translation of error stack traces to original sources. 
-- Apps expect compliance with enclosed ESLint rules based on `airbnb` code style.
 - Enclosed plugin creates another lambda function on the fly which subscribes to CloudWatch logs of other functions and sends them to Papertrail.
+
+### Code style
+
+- We expect compliance with enclosed ESLint rules based on `airbnb` code style.
+- The repository should have active code quality checking using [Code Climate](https://codeclimate.com/github/keboola/serverless-demo-app) service. Enclosed config utilizes `eslint`, `duplication` and `fixme` engines.
 
 ### Files structure
 - `src` - source code of the functions
 - `test` - app and functional tests
 - `.babelrc` - definition for Babel compiler
+- `.codeclimate.yml` - definition for Code Climate
 - `.env` - definition of env vars
 - `.eslintrc.json` - ESlint rules
 - `.travis.yml` - definition for Travis CI
@@ -32,13 +38,13 @@ A sample serverless app using AWS Lambda
 ### npm Dependencies
 - [`@keboola/serverless-request-handler`](https://github.com/keboola/serverless-request-handler) - a wrapper creating unified response for error states
 - `babel-polyfill`, `babel-core`, `babel-loader`, `babel-plugin-transform-runtime` `babel-preset-env` - requirements for ES6 translation
-- `bluebird` - Promise library with better functionality and performence then the native one
+- `bluebird` - Replacement for native promises library with better functionality and performance
 - [`lodash`](https://lodash.com/) - utility library
 - `source-map-support` - a requirement for translation of error stacks from Webpack compiled code to original source code
 - [`@keboola/serverless-default-error-responses`](https://github.com/keboola/serverless-default-error-responses) - adds unified API repsonses for error states
 - [`@keboola/serverless-papertrail-logging`](https://github.com/keboola/serverless-papertrail-logging) - redirects logs from CloudWatch to Papertrail
 - `aws-sdk` - official AWS SDK (it is in dev dependencies because Lambda runtime in AWS already has it included)
-- `axios` - a HTTP client for functional testing of API Gateway
+- [`axios`](https://github.com/axios/axios) - a HTTP client for functional testing of API Gateway
 - `eslint`, `eslint-config-airbnb-base`, `eslint-plugin-import` - requirements for ESLint
 - `mocha` - testing framework
 - `serverless` - app framework
