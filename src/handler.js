@@ -1,5 +1,6 @@
 'use strict';
 
+require('source-map-support').install();
 const { RequestHandler } = require('@keboola/serverless-request-handler');
 
 module.exports.handler = (event, context, callback) => RequestHandler.handler(() => {
