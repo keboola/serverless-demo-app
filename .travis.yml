@@ -10,17 +10,17 @@ before_script:
   - docker-compose -v
   - docker-compose build
 
-script:
-  - docker-compose run --rm ci-test-app
-  - docker-compose run --rm ci-deploy
-  - docker-compose run --rm ci-test-func
+jobs:
+  include:
+    - stage: unit test
+      script: docker-compose run --rm ci-test-app
+    - stage: deploy ci
+      script: docker-compose run --rm ci-deploy
+    - stage: functional test
+      script: docker-compose run --rm ci-test-func
+    - stage: deploy production
+      script: docker-compose run --rm prod-deploy
+      if: tag IS present
 
 after_success:
   - docker images
-
-deploy:
-  provider: script
-  skip_cleanup: true
-  script: docker-compose run --rm prod-deploy
-  on:
-    tags: true

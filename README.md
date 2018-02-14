@@ -12,7 +12,8 @@ A sample serverless app using AWS Lambda
 - AWS Lambda understands Node 6.1 only. Therefore we use Babel to compile source code during deployment which allows us to write the code in ES6.
 - The source code is bundled by Webpack during deployment. 
     - There is `source-map` support for translation of error stack traces to original sources. 
-- Apps expect compliance with enclosed ESLint rules based on `airbnb` code style
+- Apps expect compliance with enclosed ESLint rules based on `airbnb` code style.
+- Enclosed plugin creates another lambda function on the fly which subscribes to CloudWatch logs of other functions and sends them to Papertrail.
 
 ### Files structure
 - `src` - source code of the functions
@@ -48,7 +49,7 @@ A sample serverless app using AWS Lambda
 ## Stages
 
 The app uses three instances or stages.
-- `dev` is for local development
+- `dev` is for local development and each developer can has his own one
 - `test` is for continuous integration using Travis CI
 - `prod` is for production
 
@@ -57,7 +58,7 @@ Each stage has its own deployment service in [docker-compose.yml](https://github
 
 ## Environment variables
 
-It is convenient to save the env vars to `.env` file. Each stage has its own set of env vars under common prefix, see [.env.template](https://github.com/keboola/serverless-demo-app/blob/master/src/.en.template). The variables are:
+Locally, it is convenient to save the env vars to `.env` file. Each stage has its own set of env vars under common prefix, see [.env.template](https://github.com/keboola/serverless-demo-app/blob/master/src/.en.template). The variables are:
 
 - `DEPLOY_AWS_ACCESS_KEY_ID` - IAM credentials of the user used for service deployment
 - `DEPLOY_AWS_SECRET_ACCESS_KEY` - IAM credentials of the user used for service deployment
@@ -88,6 +89,37 @@ Add other resources if your app needs them.
 ## App tests
 
 App tests can run whole handler and check its response, see [test/handler.js](https://github.com/keboola/serverless-demo-app/blob/master/test/handler.js).
+
+## Functional tests
+
+Functional tests should invoke deployed functions externally. Either by calling API Gateway using a HTTP client or by invoking lambda function using AWS SDK. You will find both examples in [test/func.js](https://github.com/keboola/serverless-demo-app/blob/master/test/func.js).
+
+If your handler use other AWS resources, you should check their state in your test. Add permissions to the resources to `FunctionalTestPolicy` in [cf-stack.json](https://github.com/keboola/serverless-demo-app/blob/master/cf-stack.json).
+
+## Installation
+
+1. Download git repository: `git clone git@github.com:keboola/serverless-demo-app.git`
+2. Create a stack [cf-stack.json](https://github.com/keboola/serverless-demo-app/blob/master/cf-stack.json) with IAM policies and user groups for deployment and functional testing. You will need to fill parameters:
+    - `ServiceName` - should be the same as `SERVICE_NAME` env var (e.g. `dev-serverless-demo-app`)
+    - `KeboolaStack` - should be the same as `KEBOOLA_STACK` env var (e.g. `serverless-demo-app`)
+    - `Stage` - one of: `dev`, `test`, `prod` (again, should be the same as `STAGE` env var)
+3. Create an IAM user for deployment (e.g. `serverless-demo-app-deploy`) and assign it to the group created in previous step. Create AWS credentials.
+4. Create an IAM user for testing (e.g. `serverless-demo-app-testing`) and assign it to the group created in previous step. Create AWS credentials.
+5. Create `.env` file from template [.env.template](https://github.com/keboola/serverless-demo-app/blob/master/.env.template)
+6. Run `docker-compose run --rm dev-deploy`
+
+## CI and deployment
+
+CI is configured on Travis, see https://travis-ci.org/keboola/serverless-demo-app. Deployment to production is run automatically after releasing a version on GitHub.
+
+
+## Adding custom resources
+
+- You can add custom resources preferably by adding them to [cf-stack.json](https://github.com/keboola/serverless-demo-app/blob/master/cf-stack.json). 
+- You will have to add permissions to the IAM role used for running lambda functions. Look to `appLambdaRole` in `resources` section of [serverless.yml](https://github.com/keboola/serverless-demo-app/blob/master/serverless.yml) file.
+- You should also add permissions to the policy used for functional testing (`FunctionalTestPolicy` in [cf-stack.json](https://github.com/keboola/serverless-demo-app/blob/master/cf-stack.json)) and check state of the resources in the tests. 
+
+### Unit testing of code using custom resources
 
 You can mock some AWS services using [LocalStack](https://localstack.cloud/). In this case add the service to `docker-compose.yml`, then link it to the test service and fill env vars like:
 
@@ -147,25 +179,3 @@ const dynamo = new aws.DynamoDB({
 });
 handler.setDynamo(dynamo);
 ``` 
-
-## Functional tests
-
-Functional tests should invoke deployed functions externally. Either by calling API Gateway using a HTTP client or by invoking lambda function using AWS SDK. You will find both examples in [test/func.js](https://github.com/keboola/serverless-demo-app/blob/master/test/func.js).
-
-If your handler use other AWS resources, you should check their state in your test. Add permissions to the resources to `FunctionalTestPolicy` in [cf-stack.json](https://github.com/keboola/serverless-demo-app/blob/master/cf-stack.json).
-
-## Installation
-
-1. Download git repository: `git clone git@github.com:keboola/serverless-demo-app.git`
-2. Create a stack [cf-stack.json](https://github.com/keboola/serverless-demo-app/blob/master/cf-stack.json) with IAM policies and user groups for deployment and functional testing. You will need to fill parameters:
-    - `ServiceName` - should be the same as `SERVICE_NAME` env var (e.g. `dev-serverless-demo-app-lambda`)
-    - `KeboolaStack` - should be the same as `KEBOOLA_STACK` env var (e.g. `dev-serverless-demo-app`)
-    - `Stage` - one of: `dev`, `test`, `prod` (again, should be the same as `STAGE` env var)
-3. Create an IAM user for deployment (e.g. `serverless-demo-app-deploy`) and assign it to the group created in previous step. Create AWS credentials.
-4. Create an IAM user for testing (e.g. `serverless-demo-app-testing`) and assign it to the group created in previous step. Create AWS credentials.
-5. Create `.env` file from template [.env.template](https://github.com/keboola/serverless-demo-app/blob/master/.env.template)
-6. Run `docker-compose run --rm dev-deploy`
-
-### CI and deployment
-
-CI is configured on Travis, see https://travis-ci.org/keboola/serverless-demo-app. Deployment to production is run automatically after releasing a version on GitHub.
