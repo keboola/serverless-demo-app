@@ -92,6 +92,46 @@ There is CF template [cf-stack.json](https://github.com/keboola/serverless-demo-
 
 Add other resources if your app needs them. 
 
+## Logging
+
+Serverless plugins `@keboola/serverless-request-handler` and `@keboola/serverless-papertrail-logging` handle sending and formatting of CloudWatch logs to Papertrail. Service name is used for log's `hostname` and stage is used for log's `program`. AWS Request id is added to the log so that you can use it for further debug in CloudWatch logs if needed.
+
+The logs look like:
+
+```json
+{
+    "event": {
+        "requestId": "a32d32a5-1228-11e8-91cc-89975b126b44",
+        "function": "developer-portal-v2-prod-auth",
+        "httpMethod": "POST",
+        "path": "/auth/login"
+    },
+    "statusCode": 200
+}
+```
+
+Unhandled exceptions or rejected promises are logged with `"statusCode":500` so you can use this phrase to create Papertrail search with alarm. Example:
+
+```json
+{
+    "event": {
+        "requestId": "9ee19e2c-122b-11e8-957c-5387262d222f",
+        "function": "jakub-sqldep-analyzer-dev-visualize",
+        "httpMethod": "POST",
+        "path": "/visualize"
+    },
+    "statusCode": 500,
+    "error": {
+        "name": "TypeError",
+        "message": "_this.storage.authx is not a function",
+        "stack": [
+            "TypeError: _this.storage.authx is not a function",
+            "    at /var/task/src/lambda/webpack:/src/app/Visualize.js:18:32"
+        ]
+    }
+}
+```
+
 ## App tests
 
 App tests can run whole handler and check its response, see [test/handler.js](https://github.com/keboola/serverless-demo-app/blob/master/test/handler.js).
