@@ -29,7 +29,7 @@ A sample serverless app using AWS Lambda
 - `.eslintrc.json` - ESlint rules
 - `.travis.yml` - definition for Travis CI
 - `cf-stack.json` - CloudFormation template for custom AWS resources
-- `docker-compose.yml` - Docker Compose services for deployment and running tests
+- `docker-compose.yml` - Docker Compose services for local development
 - `Dockerfile` - Docker image setup
 - `package.json` - npm dependencies
 - `serverless.yml` - service definition for Serverless framework
@@ -59,7 +59,7 @@ The app uses three instances or stages.
 - `test` is for continuous integration using Travis CI
 - `prod` is for production
 
-Each stage has its own deployment service in [docker-compose.yml](https://github.com/keboola/serverless-demo-app/blob/master/docker-compose.yml) (called `dev-deploy`, `ci-deploy` and `prod-deploy`). Each service uses different set of env vars (prefixed by `DEV_`, `CI_` or `PROD_`).
+[docker-compose.yml](https://github.com/keboola/serverless-demo-app/blob/master/docker-compose.yml) has shortcuts to deploy and test the `dev` stage. The others are configured in [.travis.yml](https://github.com/keboola/serverless-demo-app/blob/master/.travis.yml). Each service uses different set of env vars (prefixed by `DEV_`, `CI_` or `PROD_`).
 
 
 ## Environment variables
@@ -158,6 +158,9 @@ If your handler use other AWS resources, you should check their state in your te
 
 CI is configured on Travis, see https://travis-ci.org/keboola/serverless-demo-app. Deployment to production is run automatically after releasing a version on GitHub.
 
+1. Create two sets of env variables with `CI_` and `PROD_` prefixes in Travis settings.
+2. Create an IAM user for pushing to ECR repository (e.g. `serverless-demo-app-ecr`) with `AmazonEC2ContainerRegistryFullAccess` policy attached. Save its credentials to Travis env vars as `ECR_AWS_ACCESS_KEY_ID` and `ECR_AWS_SECRET_ACCESS_KEY`.
+3. Create an ECS repository (e.g. `keboola/serverless-demo-app`) and add a Lifecycle policy to expire images with tags prefixed by `stage-` when their count exceeds 10.
 
 ## Adding custom resources
 

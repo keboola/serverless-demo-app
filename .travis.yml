@@ -1,27 +1,90 @@
-sudo: required
+sudo: true
 
 language: bash
 
 services:
   - docker
 
-before_script:
+before_install:
   - docker -v
   - docker-compose -v
-  - docker-compose build
+  - echo $TRAVIS_COMMIT
+  - export ECR_REPOSITORY=keboola/serverless-demo-app
+  - export ECR_REGISTRY="061240556736.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPOSITORY}"
+  - export ECR_TAG=stage-$TRAVIS_COMMIT
 
-script:
-  - docker-compose run --rm ci-test-app ./node_modules/.bin/eslint .
-  - docker-compose run --rm ci-test-app
-  - docker-compose run --rm ci-deploy
-  - docker-compose run --rm ci-test-func
-
-after_success:
-  - docker images
-
-deploy:
-  provider: script
-  skip_cleanup: true
-  script: docker-compose run --rm prod-deploy
-  on:
-    tags: true
+jobs:
+  include:
+    - stage: build and push
+      before_script:
+        - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
+        - docker pull $ECR_REPOSITORY:cache || true
+        - docker build --cache-from $ECR_REPOSITORY:cache -t $ECR_REPOSITORY .
+        - docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY:cache
+        - docker push $ECR_REGISTRY:cache
+        - docker build -t $ECR_REPOSITORY .
+        - docker tag $ECR_REPOSITORY:latest "${ECR_REGISTRY}:${ECR_TAG}"
+        - docker push "${ECR_REGISTRY}:${ECR_TAG}"
+      script: skip
+    - stage: lint
+      before_script:
+        - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
+        - docker pull "${ECR_REGISTRY}:${ECR_TAG}"
+      script:
+        - docker run --rm "${ECR_REGISTRY}:${ECR_TAG}" sh -c './node_modules/.bin/eslint .'
+    - stage: unit tests
+      before_script:
+        - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
+        - docker pull "${ECR_REGISTRY}:${ECR_TAG}"
+      script:
+        - >-
+          docker run --rm
+          -e "AWS_ACCESS_KEY_ID=accessKey"
+          -e "AWS_SECRET_ACCESS_KEY=secretKey"
+          -e "REGION=us-east-1"
+          "${ECR_REGISTRY}:${ECR_TAG}" sh -c './node_modules/.bin/mocha --timeout 0 --require babel-register --require source-map-support test/unit'
+    - stage: deploy to testing
+      before_script:
+        - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
+        - docker pull "${ECR_REGISTRY}:${ECR_TAG}"
+      script:
+        - >-
+          docker run --rm
+          -e "AWS_ACCESS_KEY_ID=${CI_DEPLOY_AWS_ACCESS_KEY_ID}"
+          -e "AWS_SECRET_ACCESS_KEY=${CI_DEPLOY_AWS_SECRET_ACCESS_KEY}"
+          -e "KEBOOLA_STACK=${CI_KEBOOLA_STACK}"
+          -e "PAPERTRAIL_PORT=${CI_PAPERTRAIL_PORT}"
+          -e "REGION=${CI_REGION}"
+          -e "SERVICE_NAME=${CI_SERVICE_NAME}"
+          -e "STAGE=test"
+          "${ECR_REGISTRY}:${ECR_TAG}" serverless deploy
+    - stage: functional tests
+      before_script:
+        - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
+        - docker pull "${ECR_REGISTRY}:${ECR_TAG}"
+      script:
+        - >-
+          docker run --rm
+          -e "API_ENDPOINT=${CI_API_ENDPOINT}"
+          -e "AWS_ACCESS_KEY_ID=${CI_TEST_AWS_ACCESS_KEY_ID}"
+          -e "AWS_SECRET_ACCESS_KEY=${CI_TEST_AWS_SECRET_ACCESS_KEY}"
+          -e "REGION=${CI_REGION}"
+          -e "SERVICE_NAME=${CI_SERVICE_NAME}"
+          -e "STAGE=test"
+          "${ECR_REGISTRY}:${ECR_TAG}" sh -c './node_modules/.bin/mocha --timeout 0 --require babel-register --require source-map-support test/func'
+    - stage: deploy to production
+      before_script:
+        - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
+        - docker pull "${ECR_REGISTRY}:${ECR_TAG}"
+      script:
+        - >-
+          docker run --rm
+          -e "AWS_ACCESS_KEY_ID=${PROD_DEPLOY_AWS_ACCESS_KEY_ID}"
+          -e "AWS_SECRET_ACCESS_KEY=${PROD_DEPLOY_AWS_SECRET_ACCESS_KEY}"
+          -e "KEBOOLA_STACK=${PROD_KEBOOLA_STACK}"
+          -e "PAPERTRAIL_PORT=${PROD_PAPERTRAIL_PORT}"
+          -e "REGION=${PROD_REGION}"
+          -e "SERVICE_NAME=${PROD_SERVICE_NAME}"
+          -e "STAGE=prod"
+          "${ECR_REGISTRY}:${ECR_TAG}" serverless deploy
+      if: (branch = master) AND (tag IS present)

@@ -1,5 +1,5 @@
 const expect = require('unexpected');
-const handler = require('../src/handler');
+const handler = require('../../src/handler');
 
 describe('Test handler', () => {
   it('Handle', () =>
