@@ -191,6 +191,8 @@
                       { "Ref": "AWS::AccountId" },
                       ":role/",
                       { "Ref": "ServiceName" },
+                      "-",
+                      { "Ref": "AWS::Region" },
                       "-lambda-role"
                     ]
                   ]

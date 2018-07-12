@@ -35,7 +35,7 @@ services:
       - "REGION=us-east-1"
     command: >
              sh -c '
-             ./node_modules/.bin/mocha --timeout 0 --require babel-register --require source-map-support test/unit
+             yarn test test/unit
              '
 
   test-func:
@@ -54,5 +54,5 @@ services:
       - "STAGE=dev"
     command: >
              sh -c '
-             ./node_modules/.bin/mocha --timeout 0 --require babel-register --require source-map-support test/func
+             yarn test test/func
              '

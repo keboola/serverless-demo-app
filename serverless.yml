@@ -1,7 +1,13 @@
 service: ${env:SERVICE_NAME}
 
 custom:
-  webpackIncludeModules: true
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    includeModules:
+      forceExclude:
+        - aws-sdk
+        - serverless
+    packager: 'yarn'
   papertrail:
     port: ${env:PAPERTRAIL_PORT}
 
@@ -14,7 +20,7 @@ provider:
   name: aws
   region: ${env:REGION}
   stage: ${env:STAGE}
-  runtime: nodejs6.10
+  runtime: nodejs8.10
   memorySize: 256
   timeout: 30
   versionFunctions: false
@@ -61,7 +67,7 @@ resources:
     appLambdaRole:
       Type: AWS::IAM::Role
       Properties:
-        RoleName: "${env:SERVICE_NAME}-lambda-role"
+        RoleName: "${env:SERVICE_NAME}-${env:REGION}-lambda-role"
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -71,7 +77,7 @@ resources:
                   - lambda.amazonaws.com
               Action: sts:AssumeRole
         Policies:
-          - PolicyName: "${env:SERVICE_NAME}-lambda-policy"
+          - PolicyName: "${env:SERVICE_NAME}-${env:REGION}-lambda-policy"
             PolicyDocument:
               Version: '2012-10-17'
               Statement:

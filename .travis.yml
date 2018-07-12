@@ -31,7 +31,7 @@ jobs:
         - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
         - docker pull "${ECR_REGISTRY}:${ECR_TAG}"
       script:
-        - docker run --rm "${ECR_REGISTRY}:${ECR_TAG}" sh -c './node_modules/.bin/eslint .'
+        - docker run --rm "${ECR_REGISTRY}:${ECR_TAG}" sh -c 'yarn lint'
     - stage: unit tests
       before_script:
         - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
@@ -42,7 +42,13 @@ jobs:
           -e "AWS_ACCESS_KEY_ID=accessKey"
           -e "AWS_SECRET_ACCESS_KEY=secretKey"
           -e "REGION=us-east-1"
-          "${ECR_REGISTRY}:${ECR_TAG}" sh -c './node_modules/.bin/mocha --timeout 0 --require babel-register --require source-map-support test/unit'
+          "${ECR_REGISTRY}:${ECR_TAG}" sh -c '
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter \
+            && chmod +x ./cc-test-reporter \
+            && ./cc-test-reporter before-build \
+            && yarn test test/unit test/app \
+            && yarn coverage \
+            && ./cc-test-reporter after-build  < ./coverage/lcov.info'
     - stage: deploy to testing
       before_script:
         - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
@@ -71,7 +77,7 @@ jobs:
           -e "REGION=${CI_REGION}"
           -e "SERVICE_NAME=${CI_SERVICE_NAME}"
           -e "STAGE=test"
-          "${ECR_REGISTRY}:${ECR_TAG}" sh -c './node_modules/.bin/mocha --timeout 0 --require babel-register --require source-map-support test/func'
+          "${ECR_REGISTRY}:${ECR_TAG}" sh -c 'yarn func test/func'
     - stage: deploy to production
       before_script:
         - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)

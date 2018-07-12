@@ -10,14 +10,15 @@ A sample serverless app using AWS Lambda
 ## Architecture
 
 - Our serverless apps use [Serverless Framework](https://serverless.com/framework/docs/providers/aws/guide/intro/).
-- AWS Lambda understands Node 6.1 only. Therefore we use Babel to compile source code during deployment which allows us to write the code in ES6.
+- AWS Lambda understands Node 8.1 only. Therefore we use Babel to compile source code during deployment which allows us to use new language features. 
 - The source code is bundled by Webpack during deployment. 
     - There is `source-map` support for translation of error stack traces to original sources. 
 - Enclosed plugin creates another lambda function on the fly which subscribes to CloudWatch logs of other functions and sends them to Papertrail.
 
 ### Code style
 
-- We expect compliance with enclosed ESLint rules based on `airbnb` code style.
+- We expect compliance with enclosed ESLint rules based on `airbnb-base` code style.
+- It is recommended to use [Flow](https://flow.org/) extension for static type checking. The setup supports its translation to Javascript using Babel.
 - The repository should have active code quality checking using [Code Climate](https://codeclimate.com/github/keboola/serverless-demo-app) service. Enclosed config utilizes `eslint`, `duplication` and `fixme` engines.
 
 ### Files structure
@@ -37,16 +38,15 @@ A sample serverless app using AWS Lambda
 
 ### npm Dependencies
 - [`@keboola/serverless-request-handler`](https://github.com/keboola/serverless-request-handler) - a wrapper creating unified response for error states
-- `babel-polyfill`, `babel-core`, `babel-loader`, `babel-plugin-transform-runtime` `babel-preset-env` - requirements for ES6 translation
-- `bluebird` - Replacement for native promises library with better functionality and performance
+- `babel-polyfill`, `babel-core`, `babel-loader`, `babel-plugin-transform-runtime`, `babel-preset-env`, `babel-plugin-transform-flow-strip-types`, `babel-preset-flow` - requirements for ES6 translation
 - [`lodash`](https://lodash.com/) - utility library
 - `source-map-support` - a requirement for translation of error stacks from Webpack compiled code to original source code
 - [`@keboola/serverless-default-error-responses`](https://github.com/keboola/serverless-default-error-responses) - adds unified API repsonses for error states
 - [`@keboola/serverless-papertrail-logging`](https://github.com/keboola/serverless-papertrail-logging) - redirects logs from CloudWatch to Papertrail
 - `aws-sdk` - official AWS SDK (it is in dev dependencies because Lambda runtime in AWS already has it included)
 - [`axios`](https://github.com/axios/axios) - a HTTP client for functional testing of API Gateway
-- `eslint`, `eslint-config-airbnb-base`, `eslint-plugin-import` - requirements for ESLint
-- `mocha` - testing framework
+- `eslint`, `eslint-config-airbnb-base`, `eslint-plugin-import`, `eslint-plugin-flowtype`, `eslint-plugin-flowtype-errors`, `flow-bin` - requirements for ESLint and Flow
+- `mocha`, `nyc` - testing and code coverage framework
 - `serverless` - app framework
 - `serverless-webpack`, `webpack`, `webpack-node-externals` - requirements for Webpack
 - `unexpected` - assertion library

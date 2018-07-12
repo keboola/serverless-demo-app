@@ -3,6 +3,7 @@ const path = require('path');
 const slsw = require('serverless-webpack');
 
 module.exports = {
+  mode: process.env.STAGE === 'prod' ? 'production' : 'development',
   entry: slsw.lib.entries,
   target: 'node',
   devtool: 'source-map',
@@ -10,12 +11,17 @@ module.exports = {
     modulesFromFile: true,
   })],
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
-        loaders: ['babel-loader'],
         include: __dirname,
         exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['env', 'flow'],
+          },
+        },
       },
     ],
   },
