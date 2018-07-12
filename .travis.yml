@@ -42,6 +42,7 @@ jobs:
           -e "AWS_ACCESS_KEY_ID=accessKey"
           -e "AWS_SECRET_ACCESS_KEY=secretKey"
           -e "REGION=us-east-1"
+          -e CC_TEST_REPORTER_ID
           "${ECR_REGISTRY}:${ECR_TAG}" sh -c '
             curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter \
             && chmod +x ./cc-test-reporter \
