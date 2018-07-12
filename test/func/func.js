@@ -9,8 +9,8 @@ const lambda = new aws.Lambda({
 });
 
 describe('Functional test', () => {
-  it('Invoke lambda using aws-sdk', () =>
-    lambda.invoke({
+  it('Invoke lambda using aws-sdk', async () => {
+    const res = await lambda.invoke({
       FunctionName: `${process.env.SERVICE_NAME}-${process.env.STAGE}-handler`,
       InvocationType: 'RequestResponse',
       Payload: JSON.stringify({
@@ -25,22 +25,22 @@ describe('Functional test', () => {
           requestId: '123',
         },
       }),
-    }).promise()
-      .then(res => expect(res, 'to have key', 'StatusCode')
-        .then(() => expect(res.StatusCode, 'to be', 200))
-        .then(() => expect(res, 'to have key', 'Payload'))
-        .then(() => JSON.parse(res.Payload))
-        .then(payload => expect(payload, 'to have key', 'statusCode')
-          .then(() => expect(payload.statusCode, 'to be', 200)))));
+    }).promise();
+    expect(res, 'to have key', 'StatusCode');
+    expect(res.StatusCode, 'to be', 200);
+    expect(res, 'to have key', 'Payload');
+    const payload = JSON.parse(res.Payload);
+    expect(payload, 'to have key', 'statusCode');
+    expect(payload.statusCode, 'to be', 200);
+  });
 
-  it('Invoke lambda through API', () =>
-    axios({
+  it('Invoke lambda through API', async () => {
+    const res = await axios({
       method: 'get',
       url: process.env.API_ENDPOINT,
       responseType: 'json',
-    })
-      .then((res) => {
-        expect(res.status, 'to be', 200);
-        expect(res.data, 'to be', 'OK');
-      }));
+    });
+    expect(res.status, 'to be', 200);
+    expect(res.data, 'to be', 'OK');
+  });
 });

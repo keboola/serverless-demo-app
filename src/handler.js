@@ -1,5 +1,3 @@
-'use strict';
-
 require('source-map-support').install();
 const { RequestHandler } = require('@keboola/serverless-request-handler');
 
