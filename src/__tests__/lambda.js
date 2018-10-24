@@ -1,7 +1,7 @@
-import handler from '../lambda';
+import * as lambda from '../lambda';
 
 describe('Test handler', () => {
-  it('Handle', async () => handler({
+  it('Handle', async () => lambda.handler({
     resource: '/',
     path: '/',
     httpMethod: 'GET',

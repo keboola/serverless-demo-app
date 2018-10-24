@@ -24,8 +24,8 @@ describe('Functional test', () => {
         },
       }),
     }).promise();
-    expect(res).toHaveProperty('statusCode');
-    expect(res.statusCode).toBe(200);
+    expect(res).toHaveProperty('StatusCode');
+    expect(res.StatusCode).toBe(200);
     expect(res).toHaveProperty('Payload');
     const payload = JSON.parse(res.Payload);
     expect(payload).toHaveProperty('statusCode');
@@ -38,7 +38,6 @@ describe('Functional test', () => {
       url: process.env.API_ENDPOINT,
       responseType: 'json',
     });
-    expect(res.statusCode).toBe(200);
-    expect(res.data).toBe('{"result":"ok"}');
+    expect(res.status).toBe(200);
   });
 });

@@ -16,9 +16,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",
-    "@babel/plugin-transform-runtime": "^7.1.0",
     "@babel/preset-env": "^7.1.0",
-    "@babel/register": "^7.0.0",
     "@keboola/serverless-papertrail-logging": "^1.0.4",
     "aws-sdk": "^2.188.0",
     "axios": "^0.18.0",
@@ -31,6 +29,7 @@
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jest": "^21.26.0",
     "jest": "^23.6.0",
+    "regenerator-runtime": "^0.12.1",
     "serverless": "^1.32.0",
     "serverless-webpack": "^5.2.0",
     "webpack": "^4.20.2",

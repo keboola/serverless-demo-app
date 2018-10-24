@@ -18,7 +18,6 @@ A sample serverless app using AWS Lambda
 ### Code style
 
 - We expect compliance with enclosed ESLint rules based on `airbnb-base` code style.
-- It is recommended to use [Flow](https://flow.org/) extension for static type checking. The setup supports its translation to Javascript using Babel.
 - The repository should have active code quality checking using [Code Climate](https://codeclimate.com/github/keboola/serverless-demo-app) service. Enclosed config utilizes `eslint`, `duplication` and `fixme` engines.
 
 ### Files structure
@@ -37,19 +36,17 @@ A sample serverless app using AWS Lambda
 - `webpack.config.js` - definition for Webpack
 
 ### npm Dependencies
-- [`@keboola/serverless-request-handler`](https://github.com/keboola/serverless-request-handler) - a wrapper creating unified response for error states
-- `babel-polyfill`, `babel-core`, `babel-loader`, `babel-plugin-transform-runtime`, `babel-preset-env`, `babel-plugin-transform-flow-strip-types`, `babel-preset-flow` - requirements for ES6 translation
+- [`@keboola/middy-error-logger`](https://github.com/keboola/middy-error-logger) - a middleware for Middy creating unified response for error states
+- `@babel/core`, `@babel/preset-env`, `babel-core`, `babel-eslint`, `babel-jest` - requirements for ES6 translation
 - [`lodash`](https://lodash.com/) - utility library
 - `source-map-support` - a requirement for translation of error stacks from Webpack compiled code to original source code
-- [`@keboola/serverless-default-error-responses`](https://github.com/keboola/serverless-default-error-responses) - adds unified API repsonses for error states
 - [`@keboola/serverless-papertrail-logging`](https://github.com/keboola/serverless-papertrail-logging) - redirects logs from CloudWatch to Papertrail
 - `aws-sdk` - official AWS SDK (it is in dev dependencies because Lambda runtime in AWS already has it included)
 - [`axios`](https://github.com/axios/axios) - a HTTP client for functional testing of API Gateway
-- `eslint`, `eslint-config-airbnb-base`, `eslint-plugin-import`, `eslint-plugin-flowtype`, `eslint-plugin-flowtype-errors`, `flow-bin` - requirements for ESLint and Flow
-- `mocha`, `nyc` - testing and code coverage framework
+- `eslint`, `eslint-config-airbnb-base`, `eslint-plugin-import`, `eslint-plugin-jest` - requirements for ESLint
+- `jest` - testing framework
 - `serverless` - app framework
 - `serverless-webpack`, `webpack`, `webpack-node-externals` - requirements for Webpack
-- `unexpected` - assertion library
 
 
 ## Stages
@@ -94,19 +91,24 @@ Add other resources if your app needs them.
 
 ## Logging
 
-Serverless plugins `@keboola/serverless-request-handler` and `@keboola/serverless-papertrail-logging` handle sending and formatting of CloudWatch logs to Papertrail. Service name is used for log's `hostname` and stage is used for log's `program`. AWS Request id is added to the log so that you can use it for further debug in CloudWatch logs if needed.
+Serverless plugins `@keboola/middy-error-logger` and `@keboola/serverless-papertrail-logging` handle sending and formatting of CloudWatch logs to Papertrail. Service name is used for log's `hostname` and stage is used for log's `program`. AWS Request id is added to the log so that you can use it for further debug in CloudWatch logs if needed.
 
 The logs look like:
 
 ```json
 {
+    "statusCode": 200,
     "event": {
-        "requestId": "a32d32a5-1228-11e8-91cc-89975b126b44",
-        "function": "developer-portal-v2-prod-auth",
+        "resource": "/auth/login",    
         "httpMethod": "POST",
-        "path": "/auth/login"
+        "queryStringParameters": null,
+        "body": null
     },
-    "statusCode": 200
+    "context": {
+        "sourceIp": "214.178.123.91",
+        "userAgent": "Paw/3.1.7 (Macintosh; OS X/10.14.0) GCDHTTPRequest"
+      },
+    "awsRequestId": "a32d32a5-1228-11e8-91cc-89975b126b44"
 }
 ```
 
@@ -114,31 +116,33 @@ Unhandled exceptions or rejected promises are logged with `"statusCode":500` so 
 
 ```json
 {
-    "event": {
-        "requestId": "9ee19e2c-122b-11e8-957c-5387262d222f",
-        "function": "jakub-sqldep-analyzer-dev-visualize",
-        "httpMethod": "POST",
-        "path": "/visualize"
-    },
-    "statusCode": 500,
-    "error": {
-        "name": "TypeError",
-        "message": "_this.storage.authx is not a function",
-        "stack": [
-            "TypeError: _this.storage.authx is not a function",
-            "    at /var/task/src/lambda/webpack:/src/app/Visualize.js:18:32"
-        ]
-    }
+  "message": "_this.storage.authx is not a function",
+  "statusCode": 500,
+  "stack": [
+    "TypeError: _this.storage.authx is not a function",
+    "    at /var/task/src/lambda/webpack:/src/app/Visualize.js:18:32"
+  ],
+  "event": {
+    "resource": "/",
+    "httpMethod": "GET",
+    "queryStringParameters": null,
+    "body": null
+  },
+  "context": {
+    "sourceIp": "214.178.123.91",
+    "userAgent": "Paw/3.1.7 (Macintosh; OS X/10.14.0) GCDHTTPRequest"
+  },
+  "awsRequestId": "ab022f5a-d3ad-11e8-89f6-89a425b4ca0a"
 }
 ```
 
 ## App tests
 
-App tests can run whole handler and check its response, see [test/handler.js](https://github.com/keboola/serverless-demo-app/blob/master/test/handler.js).
+App tests can run whole handler and check its response, see [src/__tests__/lambda.js](https://github.com/keboola/serverless-demo-app/blob/master/src/__tests__/lambda.js).
 
 ## Functional tests
 
-Functional tests should invoke deployed functions externally. Either by calling API Gateway using a HTTP client or by invoking lambda function using AWS SDK. You will find both examples in [test/func.js](https://github.com/keboola/serverless-demo-app/blob/master/test/func.js).
+Functional tests should invoke deployed functions externally. Either by calling API Gateway using a HTTP client or by invoking lambda function using AWS SDK. You will find both examples in [test/func.spec.js](https://github.com/keboola/serverless-demo-app/blob/master/test/func.spec.js).
 
 If your handler use other AWS resources, you should check their state in your test. Add permissions to the resources to `FunctionalTestPolicy` in [cf-stack.json](https://github.com/keboola/serverless-demo-app/blob/master/cf-stack.json).
 
@@ -202,29 +206,35 @@ You must be able to switch instances of AWS services in your lambda handler. E.g
 let s3 = new aws.S3({});
 let dynamo = new aws.DynamoDB({ region: process.env.REGION });
 
-module.exports.setS3 = client => s3 = client;
-module.exports.setDynamo = client => dynamo = client;
+export function setS3(client) { 
+  s3 = client;
+}
+  
+export function setDynamo(client) { 
+  dynamo = client;
+}
 
-module.exports.handler = (event, context, callback) => RequestHandler.handler(() => {
+export const handler = middy(() => {
   
 });
+}
 ```
 
 And finally instantiate AWS services with mocked endpoints in the tests and switch them for the handler too:
 
 ```javascript
-const handler = require('../src/handler');
+import * as lambda from '../lambda';
 
 const s3 = new aws.S3({
   s3ForcePathStyle: true,
   endpoint: new aws.Endpoint(process.env.S3_ENDPOINT),
   sslEnabled: false,
 });
-handler.setS3(s3);
+lambda.setS3(s3);
 
 const dynamo = new aws.DynamoDB({
   region: process.env.REGION,
   endpoint: process.env.DYNAMO_ENDPOINT,
 });
-handler.setDynamo(dynamo);
+lambda.setDynamo(dynamo);
 ``` 
