@@ -13,7 +13,6 @@ custom:
 
 plugins:
   - '@keboola/serverless-papertrail-logging'
-  - '@keboola/serverless-default-error-responses'
   - serverless-webpack
 
 provider:
@@ -53,7 +52,7 @@ package:
 functions:
 
   handler:
-    handler: src/handler.handler
+    handler: src/lambda.handler
     tags:
       KeboolaStack: ${env:KEBOOLA_STACK}
     events:

@@ -1,4 +1,8 @@
 {
-  "presets": ["env", "flow"],
-  "plugins": ["transform-runtime", "transform-flow-strip-types"]
+  "presets": [
+    "env"
+  ],
+  "plugins": [
+    "transform-runtime"
+  ]
 }

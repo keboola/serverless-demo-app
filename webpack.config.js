@@ -1,8 +1,8 @@
-const nodeExternals = require('webpack-node-externals');
-const path = require('path');
-const slsw = require('serverless-webpack');
+import path from 'path';
+import slsw from 'serverless-webpack';
+import nodeExternals from 'webpack-node-externals';
 
-module.exports = {
+export default {
   mode: process.env.STAGE === 'prod' ? 'production' : 'development',
   entry: slsw.lib.entries,
   target: 'node',
@@ -19,7 +19,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['env', 'flow'],
+            presets: ['env'],
           },
         },
       },

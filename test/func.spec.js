@@ -1,7 +1,5 @@
-const aws = require('aws-sdk');
-const axios = require('axios');
-const expect = require('unexpected');
-const Promise = require('bluebird');
+import * as aws from 'aws-sdk';
+import axios from 'axios';
 
 aws.config.setPromisesDependency(Promise);
 const lambda = new aws.Lambda({
@@ -26,12 +24,12 @@ describe('Functional test', () => {
         },
       }),
     }).promise();
-    expect(res, 'to have key', 'StatusCode');
-    expect(res.StatusCode, 'to be', 200);
-    expect(res, 'to have key', 'Payload');
+    expect(res).toHaveProperty('statusCode');
+    expect(res.statusCode).toBe(200);
+    expect(res).toHaveProperty('Payload');
     const payload = JSON.parse(res.Payload);
-    expect(payload, 'to have key', 'statusCode');
-    expect(payload.statusCode, 'to be', 200);
+    expect(payload).toHaveProperty('statusCode');
+    expect(payload.statusCode).toBe(200);
   });
 
   it('Invoke lambda through API', async () => {
@@ -40,7 +38,7 @@ describe('Functional test', () => {
       url: process.env.API_ENDPOINT,
       responseType: 'json',
     });
-    expect(res.status, 'to be', 200);
-    expect(res.data, 'to be', 'OK');
+    expect(res.statusCode).toBe(200);
+    expect(res.data).toBe('{"result":"ok"}');
   });
 });
