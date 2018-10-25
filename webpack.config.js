@@ -1,8 +1,8 @@
-import path from 'path';
-import slsw from 'serverless-webpack';
-import nodeExternals from 'webpack-node-externals';
+const path = require('path');
+const slsw = require('serverless-webpack');
+const nodeExternals = require('webpack-node-externals');
 
-export default {
+module.exports = {
   mode: process.env.STAGE === 'prod' ? 'production' : 'development',
   entry: slsw.lib.entries,
   target: 'node',
