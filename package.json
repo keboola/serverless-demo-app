@@ -38,6 +38,6 @@
   "scripts": {
     "test:unit": "./node_modules/.bin/jest --bail src",
     "test:func": "./node_modules/.bin/jest --bail test",
-    "test:lint": "./node_modules/eslint/.bin src"
+    "test:lint": "./node_modules/.bin/eslint src"
   }
 }
