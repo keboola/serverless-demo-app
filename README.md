@@ -37,7 +37,8 @@ A sample serverless app using AWS Lambda
 
 ### npm Dependencies
 - [`@keboola/middy-error-logger`](https://github.com/keboola/middy-error-logger) - a middleware for Middy creating unified response for error states
-- `@babel/core`, `@babel/preset-env`, `babel-core`, `babel-eslint`, `babel-jest` - requirements for ES6 translation
+- `@babel/core`, `@babel/runtime`, `@babel/plugin-transform-runtime`, `@babel/preset-env`, `babel-core`, `babel-eslint`, `babel-jest` - requirements for ES6 translation
+- `bluebird` - extended support for Promises
 - [`lodash`](https://lodash.com/) - utility library
 - `source-map-support` - a requirement for translation of error stacks from Webpack compiled code to original source code
 - [`@keboola/serverless-papertrail-logging`](https://github.com/keboola/serverless-papertrail-logging) - redirects logs from CloudWatch to Papertrail
@@ -47,6 +48,35 @@ A sample serverless app using AWS Lambda
 - `jest` - testing framework
 - `serverless` - app framework
 - `serverless-webpack`, `webpack`, `webpack-node-externals` - requirements for Webpack
+
+### Lambda handler
+
+The basic structure of `src/lambda.js` file looks like this:
+
+```js
+import bluebird from 'bluebird';
+import middy from 'middy';
+import { install } from 'source-map-support';
+import errorLogger from '@keboola/middy-error-logger';
+
+install();
+process.env.BLUEBIRD_LONG_STACK_TRACES = 1;
+global.Promise = bluebird;
+
+const handlerFunction = () => {
+  const result = { result: 'ok' };
+  return Promise.resolve({ statusCode: 200, body: JSON.stringify(result) });
+};
+
+// eslint-disable-next-line
+export const handler = middy(handlerFunction)
+  .use(errorLogger());
+```
+
+- We replace built-in promises with Bluebird because Node.js implementation so far does not support stack traces for rejections  in async/await code (see https://github.com/nodejs/node/issues/11865).
+- The code is compressed using Webpack so we need to install source maps support (to get line numbers of original source files in stack traces).
+- We use Middy.js as a middleware engine with [our error logger](https://github.com/keboola/middy-error-logger) as its middleware.
+- This file should contain necessary minimum of code to simplify testing process. You can add some routing here, see e.g. [keboola/gooddata-provisioning](https://github.com/keboola/gooddata-provisioning/blob/master/src/api.js).
 
 
 ## Stages

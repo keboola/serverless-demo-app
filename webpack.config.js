@@ -1,6 +1,6 @@
+const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const slsw = require('serverless-webpack');
-const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
   mode: process.env.STAGE === 'prod' ? 'production' : 'development',
@@ -20,6 +20,7 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/env'],
+            plugins: ['@babel/plugin-transform-runtime'],
           },
         },
       },
