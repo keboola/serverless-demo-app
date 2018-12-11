@@ -8,11 +8,8 @@ custom:
         - aws-sdk
         - serverless
     packager: 'yarn'
-  papertrail:
-    port: ${env:PAPERTRAIL_PORT}
 
 plugins:
-  - '@keboola/serverless-papertrail-logging'
   - serverless-webpack
 
 provider:
@@ -20,7 +17,7 @@ provider:
   runtime: nodejs8.10
   region: ${env:REGION}
   stage: ${env:STAGE}
-  memorySize: 256
+  memorySize: 128
   timeout: 30
   versionFunctions: false
   deploymentBucket:

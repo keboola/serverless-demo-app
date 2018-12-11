@@ -13,7 +13,6 @@ A sample serverless app using AWS Lambda
 - AWS Lambda understands Node 8.1 only. Therefore we use Babel to compile source code during deployment which allows us to use new language features. 
 - The source code is bundled by Webpack during deployment. 
     - There is `source-map` support for translation of error stack traces to original sources. 
-- Enclosed plugin creates another lambda function on the fly which subscribes to CloudWatch logs of other functions and sends them to Papertrail.
 
 ### Code style
 
@@ -41,7 +40,6 @@ A sample serverless app using AWS Lambda
 - `bluebird` - extended support for Promises
 - [`lodash`](https://lodash.com/) - utility library
 - `source-map-support` - a requirement for translation of error stacks from Webpack compiled code to original source code
-- [`@keboola/serverless-papertrail-logging`](https://github.com/keboola/serverless-papertrail-logging) - redirects logs from CloudWatch to Papertrail
 - `aws-sdk` - official AWS SDK (it is in dev dependencies because Lambda runtime in AWS already has it included)
 - [`axios`](https://github.com/axios/axios) - a HTTP client for functional testing of API Gateway
 - `eslint`, `eslint-config-airbnb-base`, `eslint-plugin-import`, `eslint-plugin-jest` - requirements for ESLint
@@ -96,7 +94,6 @@ Locally, it is convenient to save the env vars to `.env` file. Each stage has it
 - `DEPLOY_AWS_ACCESS_KEY_ID` - IAM credentials of the user used for service deployment
 - `DEPLOY_AWS_SECRET_ACCESS_KEY` - IAM credentials of the user used for service deployment
 - `KEBOOLA_STACK` - AWS tag of created resources, it should be the same for all instances (e.g. `serverless-demo-app`)
-- `PAPERTRAIL_PORT` - assigned port of PaperTrail service for logging
 - `REGION` - AWS region of deployed service
 - `SERVICE_NAME` - used for names of AWS resources, it should be unique (e.g. `jakub-serverless-demo-app`)
 
@@ -121,7 +118,7 @@ Add other resources if your app needs them.
 
 ## Logging
 
-Serverless plugins `@keboola/middy-error-logger` and `@keboola/serverless-papertrail-logging` handle sending and formatting of CloudWatch logs to Papertrail. Service name is used for log's `hostname` and stage is used for log's `program`. AWS Request id is added to the log so that you can use it for further debug in CloudWatch logs if needed.
+Serverless plugins `@keboola/middy-error-logger` handle formatting of CloudWatch logs to Papertrail. Service name is used for log's `hostname` and stage is used for log's `program`. AWS Request id is added to the log so that you can use it for further debug in CloudWatch logs if needed.
 
 The logs look like:
 
