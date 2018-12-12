@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import * as aws from 'aws-sdk';
 import axios from 'axios';
 

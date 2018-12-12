@@ -3,11 +3,20 @@ service: ${env:SERVICE_NAME}
 custom:
   webpack:
     webpackConfig: 'webpack.config.js'
-    includeModules:
-      forceExclude:
-        - aws-sdk
-        - serverless
+    includeModules: true
+    forceExclude:
+      - aws-sdk
+      - serverless
     packager: 'yarn'
+  cors:
+    origin: '*'
+    headers:
+      - Content-Type
+      - X-StorageApi-Token
+      - X-Amz-Date
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+    allowCredentials: false
 
 plugins:
   - serverless-webpack
@@ -22,7 +31,8 @@ provider:
   versionFunctions: false
   deploymentBucket:
     name: "${env:SERVICE_NAME}-${env:REGION}-deployment"
-  role: appLambdaRole
+  cfnRole: ${env:CLOUDFORMATION_ROLE_ARN}
+  role: ${env:LAMBDA_EXECUTION_ROLE_ARN}
   stackTags:
     KeboolaStack: ${env:KEBOOLA_STACK}
   environment:
@@ -30,9 +40,10 @@ provider:
 package:
   individually: true
   include:
-    - src/lambda.js
+    - src/**
     - node_modules/**
   exclude:
+    - .codeclimate.yml
     - .env
     - .env.template
     - .eslintignore
@@ -59,36 +70,4 @@ functions:
         http:
           method: get
           path: "/"
-
-resources:
-  Resources:
-    appLambdaRole:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: "${env:SERVICE_NAME}-${env:REGION}-lambda-role"
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Principal:
-                Service:
-                  - lambda.amazonaws.com
-              Action: sts:AssumeRole
-        Policies:
-          - PolicyName: "${env:SERVICE_NAME}-${env:REGION}-lambda-policy"
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - logs:CreateLogGroup
-                    - logs:CreateLogStream
-                    - logs:PutLogEvents
-                  Resource: { 'Fn::Join': [':', ['arn:aws:logs', { Ref: 'AWS::Region' }, { Ref: 'AWS::AccountId' }, 'log-group:/aws/lambda/*:*:*']] }
-                - Effect: Allow
-                  Action:
-                    - ec2:CreateNetworkInterface
-                    - ec2:DescribeNetworkInterfaces
-                    - ec2:DetachNetworkInterface
-                    - ec2:DeleteNetworkInterface
-                  Resource: "*"
+          cors: ${self:custom.cors}

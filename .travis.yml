@@ -26,6 +26,7 @@ jobs:
         - docker tag $ECR_REPOSITORY:latest "${ECR_REGISTRY}:${ECR_TAG}"
         - docker push "${ECR_REGISTRY}:${ECR_TAG}"
       script: skip
+
     - stage: lint
       before_script:
         - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
@@ -44,6 +45,7 @@ jobs:
           -e "REGION=us-east-1"
           -e CC_TEST_REPORTER_ID
           "${ECR_REGISTRY}:${ECR_TAG}" yarn test:unit
+
     - stage: deploy to testing
       before_script:
         - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
@@ -53,11 +55,14 @@ jobs:
           docker run --rm
           -e "AWS_ACCESS_KEY_ID=${CI_DEPLOY_AWS_ACCESS_KEY_ID}"
           -e "AWS_SECRET_ACCESS_KEY=${CI_DEPLOY_AWS_SECRET_ACCESS_KEY}"
+          -e "CLOUDFORMATION_ROLE_ARN=${CI_CLOUDFORMATION_ROLE_ARN}"
+          -e "LAMBDA_EXECUTION_ROLE_ARN=${CI_LAMBDA_EXECUTION_ROLE_ARN}"
           -e "KEBOOLA_STACK=${CI_KEBOOLA_STACK}"
           -e "REGION=${CI_REGION}"
           -e "SERVICE_NAME=${CI_SERVICE_NAME}"
           -e "STAGE=test"
           "${ECR_REGISTRY}:${ECR_TAG}" serverless deploy
+
     - stage: functional tests
       before_script:
         - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
@@ -72,6 +77,7 @@ jobs:
           -e "SERVICE_NAME=${CI_SERVICE_NAME}"
           -e "STAGE=test"
           "${ECR_REGISTRY}:${ECR_TAG}" yarn test:func
+
     - stage: deploy to production
       before_script:
         - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
@@ -81,6 +87,8 @@ jobs:
           docker run --rm
           -e "AWS_ACCESS_KEY_ID=${PROD_DEPLOY_AWS_ACCESS_KEY_ID}"
           -e "AWS_SECRET_ACCESS_KEY=${PROD_DEPLOY_AWS_SECRET_ACCESS_KEY}"
+          -e "CLOUDFORMATION_ROLE_ARN=${PROD_CLOUDFORMATION_ROLE_ARN}"
+          -e "LAMBDA_EXECUTION_ROLE_ARN=${PROD_LAMBDA_EXECUTION_ROLE_ARN}"
           -e "KEBOOLA_STACK=${PROD_KEBOOLA_STACK}"
           -e "REGION=${PROD_REGION}"
           -e "SERVICE_NAME=${PROD_SERVICE_NAME}"

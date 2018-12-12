@@ -36,7 +36,7 @@ A sample serverless app using AWS Lambda
 
 ### npm Dependencies
 - [`@keboola/middy-error-logger`](https://github.com/keboola/middy-error-logger) - a middleware for Middy creating unified response for error states
-- `@babel/core`, `@babel/runtime`, `@babel/plugin-transform-runtime`, `@babel/preset-env`, `babel-core`, `babel-eslint`, `babel-jest` - requirements for ES6 translation
+- `@babel/core`, `@babel/preset-env`, `babel-core`, `babel-eslint`, `babel-jest` - requirements for ES6 translation
 - `bluebird` - extended support for Promises
 - [`lodash`](https://lodash.com/) - utility library
 - `source-map-support` - a requirement for translation of error stacks from Webpack compiled code to original source code
