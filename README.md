@@ -16,7 +16,7 @@ A sample serverless app using AWS Lambda
 
 ### Code style
 
-- We expect compliance with enclosed ESLint rules based on `airbnb-base` code style.
+- Compliance with enclosed ESLint rules based on `@keboola/eslint-config-node` is expected.
 - The repository should have active code quality checking using [Code Climate](https://codeclimate.com/github/keboola/serverless-demo-app) service. Enclosed config utilizes `eslint`, `duplication` and `fixme` engines.
 
 ### Files structure
