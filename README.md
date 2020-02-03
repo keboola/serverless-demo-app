@@ -3,13 +3,13 @@
 [![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
 [![Build Status](https://travis-ci.org/keboola/serverless-demo-app.svg)](https://travis-ci.org/keboola/serverless-demo-app)
 
-A sample serverless app using AWS Lambda
+A sample serverless app for Keboola infrastructure
 
 
 ## Architecture
 
 - Our serverless apps use [Serverless Framework](https://serverless.com/framework/docs/providers/aws/guide/intro/).
-- AWS Lambda understands only LTS versions Node (currently 12). Therefore we use Babel to compile source code during deployment which allows us to use new language features. 
+- AWS Lambda understands only LTS versions Node (currently v12). Therefore we use Babel to compile source code during deployment which allows us to use new language features. 
 - The source code is bundled by Webpack during deployment. 
     - There is `source-map` support for translation of error stack traces to original sources. 
 
@@ -21,7 +21,6 @@ A sample serverless app using AWS Lambda
 - `src` - source code of the functions
 - `test` - app and functional tests
 - `.babelrc` - definition for Babel compiler
-- `.codeclimate.yml` - definition for Code Climate
 - `.env` - definition of env vars
 - `.eslintrc.json` - ESlint rules
 - `.travis.yml` - definition for Travis CI
@@ -35,13 +34,12 @@ A sample serverless app using AWS Lambda
 ### npm Dependencies
 - [`@keboola/middy-error-logger`](https://github.com/keboola/middy-error-logger) - a middleware for Middy creating unified response for error states
 - `@babel/core`, `@babel/preset-env`, `babel-core`, `babel-eslint`, `babel-jest` - requirements for ES6 translation
-- `bluebird` - extended support for Promises
 - [`lodash`](https://lodash.com/) - utility library
 - `source-map-support` - a requirement for translation of error stacks from Webpack compiled code to original source code
 - `aws-sdk` - official AWS SDK (it is in dev dependencies because Lambda runtime in AWS already has it included)
 - [`axios`](https://github.com/axios/axios) - a HTTP client for functional testing of API Gateway
-- `eslint`, `eslint-config-airbnb-base`, `eslint-plugin-import`, `eslint-plugin-jest` - requirements for ESLint
-- `jest` - testing framework
+- `eslint`, `babel-eslint`, `@keboola/eslint-config-node` - requirements for ESLint
+- `mocha` - testing framework
 - `serverless` - app framework
 - `serverless-webpack`, `webpack`, `webpack-node-externals` - requirements for Webpack
 
@@ -50,14 +48,11 @@ A sample serverless app using AWS Lambda
 The basic structure of `src/lambda.js` file looks like this:
 
 ```js
-import bluebird from 'bluebird';
 import middy from 'middy';
 import { install } from 'source-map-support';
 import errorLogger from '@keboola/middy-error-logger';
 
 install();
-process.env.BLUEBIRD_LONG_STACK_TRACES = 1;
-global.Promise = bluebird;
 
 const handlerFunction = () => {
   const result = { result: 'ok' };
@@ -69,9 +64,9 @@ export const handler = middy(handlerFunction)
   .use(errorLogger());
 ```
 
-- We replace built-in promises with Bluebird because Node.js implementation so far does not support stack traces for rejections  in async/await code (see https://github.com/nodejs/node/issues/11865).
 - The code is compressed using Webpack so we need to install source maps support (to get line numbers of original source files in stack traces).
 - We use Middy.js as a middleware engine with [our error logger](https://github.com/keboola/middy-error-logger) as its middleware.
+- It expects using of [http-errors](https://www.npmjs.com/package/http-errors) for client errors and handles the output to client accordingly.
 - This file should contain necessary minimum of code to simplify testing process. You can add some routing here, see e.g. [keboola/gooddata-provisioning](https://github.com/keboola/gooddata-provisioning/blob/master/src/api.js).
 
 
@@ -99,7 +94,7 @@ Variables used for testing:
 
 - `TEST_AWS_ACCESS_KEY_ID` - IAM credentials of user used for functional testing
 - `TEST_AWS_SECRET_ACCESS_KEY` - IAM credentials of user used for functional testing
-- `API_ENDPOINT` - http endpoint of created API Gateway (e.g. `https://l217h7oa23.execute-api.eu-west-1.amazonaws.com/dev`)
+- `TEST_API_ENDPOINT` - http endpoint of created API Gateway (e.g. `https://l217h7oa23.execute-api.eu-west-1.amazonaws.com/dev`)
 
 You will want to add other variables if your functions use other resources.
 
@@ -163,11 +158,11 @@ Unhandled exceptions or rejected promises are logged with `"statusCode":500` so 
 
 ## App tests
 
-App tests can run whole handler and check its response, see [src/__tests__/lambda.js](https://github.com/keboola/serverless-demo-app/blob/master/src/__tests__/lambda.js).
+App tests can run whole handler and check its response, see [test/unit/lambda.js](https://github.com/keboola/serverless-demo-app/blob/master/test/unit/lambda.js).
 
 ## Functional tests
 
-Functional tests should invoke deployed functions externally. Either by calling API Gateway using a HTTP client or by invoking lambda function using AWS SDK. You will find both examples in [test/func.js](https://github.com/keboola/serverless-demo-app/blob/master/test/func.spec.js).
+Functional tests should invoke deployed functions externally. Either by calling API Gateway using a HTTP client or by invoking lambda function using AWS SDK. You will find both examples in [test/func/func.js](https://github.com/keboola/serverless-demo-app/blob/master/test/func/func.js).
 
 If your handler use other AWS resources, you should check their state in your test. Add permissions to the resources to `FunctionalTestPolicy` in [cf-stack.json](https://github.com/keboola/serverless-demo-app/blob/master/cf-stack.json).
 
@@ -185,7 +180,7 @@ If your handler use other AWS resources, you should check their state in your te
 
 ## CI and deployment
 
-CI is configured on Travis, see https://travis-ci.org/keboola/serverless-demo-app. Deployment to production is run automatically after releasing a version on GitHub.
+CI is configured on Travis, see <https://travis-ci.org/keboola/serverless-demo-app>. Deployment to production is run automatically after releasing a version on GitHub.
 
 1. Create two sets of env variables with `CI_` and `PROD_` prefixes in Travis settings.
 2. Create an IAM user for pushing to ECR repository (e.g. `serverless-demo-app-ecr`) with `AmazonEC2ContainerRegistryFullAccess` policy attached. Save its credentials to Travis env vars as `ECR_AWS_ACCESS_KEY_ID` and `ECR_AWS_SECRET_ACCESS_KEY`.
@@ -242,7 +237,6 @@ export function setDynamo(client) {
 export const handler = middy(() => {
   
 });
-}
 ```
 
 And finally instantiate AWS services with mocked endpoints in the tests and switch them for the handler too:

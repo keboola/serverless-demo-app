@@ -12,7 +12,6 @@
     "@babel/runtime": "^7.1.2",
     "@keboola/middy-error-logger": "^1.0.1",
     "aws-xray-sdk": "^2.5.0",
-    "bluebird": "^3.5.2",
     "http-errors": "^1.7.1",
     "lodash": "^4.17.13",
     "middy": "^0.33.2",

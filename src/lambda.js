@@ -1,5 +1,4 @@
 import errorLogger from '@keboola/middy-error-logger';
-import bluebird from 'bluebird';
 import middy from 'middy';
 import { cors } from 'middy/middlewares';
 import { install } from 'source-map-support';
@@ -9,8 +8,6 @@ import { install } from 'source-map-support';
 import '@babel/runtime/helpers/interopRequireDefault';
 
 install();
-process.env.BLUEBIRD_LONG_STACK_TRACES = 1;
-global.Promise = bluebird;
 
 const handlerFunction = () => {
   const result = { result: 'ok' };
