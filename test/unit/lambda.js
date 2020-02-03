@@ -1,4 +1,5 @@
-import * as lambda from '../lambda';
+import expect from 'unexpected';
+import * as lambda from '../../src/lambda';
 
 describe('Test handler', () => {
   it('Handle', async () => lambda.handler({
@@ -13,9 +14,9 @@ describe('Test handler', () => {
       requestId: '123',
     },
   }, {}, (err, res) => {
-    expect(res).toHaveProperty('statusCode');
-    expect(res.statusCode).toBe(200);
-    expect(res).toHaveProperty('body');
-    expect(res.body).toBe('{"result":"ok"}');
+    expect(res, 'to have key', 'statusCode');
+    expect(res.statusCode, 'to equal', 200);
+    expect(res, 'to have key', 'body');
+    expect(res.body, 'to equal', '{"result":"ok"}');
   }));
 });

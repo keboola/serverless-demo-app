@@ -1,9 +1,6 @@
-/**
- * @jest-environment node
- */
-
 import * as aws from 'aws-sdk';
 import axios from 'axios';
+import expect from 'unexpected';
 
 aws.config.setPromisesDependency(Promise);
 const lambda = new aws.Lambda({
@@ -28,12 +25,12 @@ describe('Functional test', () => {
         },
       }),
     }).promise();
-    expect(res).toHaveProperty('StatusCode');
-    expect(res.StatusCode).toBe(200);
-    expect(res).toHaveProperty('Payload');
+    expect(res, 'to have key', 'StatusCode');
+    expect(res.StatusCode, 'to be', 200);
+    expect(res, 'to have key', 'Payload');
     const payload = JSON.parse(res.Payload);
-    expect(payload).toHaveProperty('statusCode');
-    expect(payload.statusCode).toBe(200);
+    expect(payload, 'to have key', 'statusCode');
+    expect(payload.statusCode, 'to equal', 200);
   });
 
   it('Invoke lambda through API', async () => {
@@ -42,6 +39,6 @@ describe('Functional test', () => {
       url: process.env.API_ENDPOINT,
       responseType: 'json',
     });
-    expect(res.status).toBe(200);
+    expect(res.status, 'to equal', 200);
   });
 });

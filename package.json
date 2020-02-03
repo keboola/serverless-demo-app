@@ -2,7 +2,7 @@
   "name": "serverless-demo-app",
   "author": "Jakub Matejka <jakub@keboola.com>",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Sample Serverless App",
   "repository": {
     "type": "git",
@@ -11,9 +11,11 @@
   "dependencies": {
     "@babel/runtime": "^7.1.2",
     "@keboola/middy-error-logger": "^1.0.1",
+    "aws-xray-sdk": "^2.5.0",
     "bluebird": "^3.5.2",
-    "lodash": "^4.17.4",
-    "middy": "^0.19.1",
+    "http-errors": "^1.7.1",
+    "lodash": "^4.17.13",
+    "middy": "^0.33.2",
     "source-map-support": "^0.5.9"
   },
   "devDependencies": {
@@ -21,25 +23,26 @@
     "@babel/plugin-transform-runtime": "^7.1.0",
     "@babel/preset-env": "^7.1.0",
     "@babel/register": "^7.0.0",
-    "@keboola/eslint-config-node": "^1.0.1",
-    "aws-sdk": "^2.188.0",
-    "axios": "^0.18.0",
+    "@keboola/eslint-config-node": "^2.0.0",
+    "@keboola/serverless-default-error-responses": "^1.0.0",
+    "aws-sdk": "^2.458.0",
+    "axios": "^0.19.0",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
-    "babel-jest": "^23.6.0",
     "babel-loader": "^8.0.4",
-    "eslint": "^5.7.0",
+    "eslint": "^6.6.0",
     "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jest": "^22.1.2",
-    "jest": "^23.6.0",
-    "serverless": "^1.32.0",
+    "mocha": "^7.0.0",
+    "serverless": "^1.60.0",
+    "serverless-offline": "^5.12.0",
     "serverless-webpack": "^5.2.0",
-    "webpack": "^4.20.2",
+    "unexpected": "^11.8.1",
+    "webpack": "^4.32.0",
     "webpack-node-externals": "^1.5.4"
   },
   "scripts": {
-    "test:unit": "./node_modules/.bin/jest --bail src",
-    "test:func": "./node_modules/.bin/jest --bail test",
+    "test:unit": "./node_modules/.bin/mocha --bail --exit --timeout 0 --require @babel/register --require source-map-support test/unit",
+    "test:func": "./node_modules/.bin/mocha --bail --exit --timeout 0 --require @babel/register --require source-map-support test/func",
     "test:lint": "./node_modules/.bin/eslint src"
   }
 }

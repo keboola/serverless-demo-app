@@ -80,6 +80,17 @@
               ]
             },
             {
+              "Effect": "Allow",
+              "Action": [
+                "apigateway:*"
+              ],
+              "Resource": [
+                { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/restapis" },
+                { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/restapis/*" },
+                { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/tags/*" }
+              ]
+            },
+            {
               "Sid": "RemoveAfterDeploy",
               "Effect": "Allow",
               "Action": [
@@ -247,6 +258,14 @@
                     "logs:PutLogEvents"
                   ],
                   "Resource": { "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ServiceName}*:*:*" }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "xray:PutTraceSegments",
+                    "xray:PutTelemetryRecords"
+                  ],
+                  "Resource": "*"
                 }
               ]
             }

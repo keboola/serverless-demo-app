@@ -1,59 +1,52 @@
 version: "2"
 
 services:
-
-  deploy:
+  app:
+    image: keboola/serverless-demo-app
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
     volumes:
-      - .:/code
+      - .:/code:cached
+    working_dir: /code
+
+  deploy:
+    image: keboola/serverless-demo-app
+    volumes:
+      - .:/code:cached
     working_dir: /code
     environment:
       - "AWS_ACCESS_KEY_ID=${DEV_DEPLOY_AWS_ACCESS_KEY_ID}"
       - "AWS_SECRET_ACCESS_KEY=${DEV_DEPLOY_AWS_SECRET_ACCESS_KEY}"
       - "CLOUDFORMATION_ROLE_ARN=${DEV_CLOUDFORMATION_ROLE_ARN}"
       - "LAMBDA_EXECUTION_ROLE_ARN=${DEV_LAMBDA_EXECUTION_ROLE_ARN}"
-      - "KEBOOLA_STACK=${DEV_KEBOOLA_STACK}"
+      - "KEBOOLA_STACK_TAG=${DEV_KEBOOLA_STACK_TAG}"
       - "REGION=${DEV_REGION}"
       - "SERVICE_NAME=${DEV_SERVICE_NAME}"
-      - "STAGE=dev"
-    command: >
-             sh -c '
-             serverless deploy
-             '
+      - "STAGE=${DEV_STAGE}"
+    command: serverless deploy --force
 
   test-unit:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    image: keboola/serverless-demo-app
     volumes:
-      - .:/code
+      - .:/code:cached
     working_dir: /code
     environment:
       - "AWS_ACCESS_KEY_ID=accessKey"
       - "AWS_SECRET_ACCESS_KEY=secretKey"
       - "REGION=us-east-1"
-    command: >
-             sh -c '
-             yarn test:unit
-             '
+    command: yarn test:unit
 
   test-func:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    image: keboola/serverless-demo-app
     volumes:
-      - .:/code
+      - .:/code:cached
     working_dir: /code
     environment:
-      - "API_ENDPOINT=${DEV_API_ENDPOINT}"
-      - "AWS_ACCESS_KEY_ID=${DEV_TEST_AWS_ACCESS_KEY_ID}"
-      - "AWS_SECRET_ACCESS_KEY=${DEV_TEST_AWS_SECRET_ACCESS_KEY}"
+      - "API_ENDPOINT=${TEST_API_ENDPOINT}"
+      - "AWS_ACCESS_KEY_ID=${TEST_AWS_ACCESS_KEY_ID}"
+      - "AWS_SECRET_ACCESS_KEY=${TEST_AWS_SECRET_ACCESS_KEY}"
       - "REGION=${DEV_REGION}"
       - "SERVICE_NAME=${DEV_SERVICE_NAME}"
-      - "STAGE=dev"
-    command: >
-             sh -c '
-             yarn test:func
-             '
+      - "STAGE=${DEV_STAGE}"
+    command: yarn test:func

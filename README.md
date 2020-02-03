@@ -2,7 +2,6 @@
 
 [![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
 [![Build Status](https://travis-ci.org/keboola/serverless-demo-app.svg)](https://travis-ci.org/keboola/serverless-demo-app)
-[![Maintainability](https://api.codeclimate.com/v1/badges/75829e3775f6c1905a14/maintainability)](https://codeclimate.com/github/keboola/serverless-demo-app/maintainability)
 
 A sample serverless app using AWS Lambda
 
@@ -10,14 +9,13 @@ A sample serverless app using AWS Lambda
 ## Architecture
 
 - Our serverless apps use [Serverless Framework](https://serverless.com/framework/docs/providers/aws/guide/intro/).
-- AWS Lambda understands Node 8.1 only. Therefore we use Babel to compile source code during deployment which allows us to use new language features. 
+- AWS Lambda understands only LTS versions Node (currently 12). Therefore we use Babel to compile source code during deployment which allows us to use new language features. 
 - The source code is bundled by Webpack during deployment. 
     - There is `source-map` support for translation of error stack traces to original sources. 
 
 ### Code style
 
 - Compliance with enclosed ESLint rules based on `@keboola/eslint-config-node` is expected.
-- The repository should have active code quality checking using [Code Climate](https://codeclimate.com/github/keboola/serverless-demo-app) service. Enclosed config utilizes `eslint`, `duplication` and `fixme` engines.
 
 ### Files structure
 - `src` - source code of the functions
@@ -93,7 +91,7 @@ Locally, it is convenient to save the env vars to `.env` file. Each stage has it
 
 - `DEPLOY_AWS_ACCESS_KEY_ID` - IAM credentials of the user used for service deployment
 - `DEPLOY_AWS_SECRET_ACCESS_KEY` - IAM credentials of the user used for service deployment
-- `KEBOOLA_STACK` - AWS tag of created resources, it should be the same for all instances (e.g. `serverless-demo-app`)
+- `KEBOOLA_STACK_TAG` - AWS tag of created resources, it should be the same for all instances (e.g. `serverless-demo-app`)
 - `REGION` - AWS region of deployed service
 - `SERVICE_NAME` - used for names of AWS resources, it should be unique (e.g. `jakub-serverless-demo-app`)
 
@@ -169,7 +167,7 @@ App tests can run whole handler and check its response, see [src/__tests__/lambd
 
 ## Functional tests
 
-Functional tests should invoke deployed functions externally. Either by calling API Gateway using a HTTP client or by invoking lambda function using AWS SDK. You will find both examples in [test/func.spec.js](https://github.com/keboola/serverless-demo-app/blob/master/test/func.spec.js).
+Functional tests should invoke deployed functions externally. Either by calling API Gateway using a HTTP client or by invoking lambda function using AWS SDK. You will find both examples in [test/func.js](https://github.com/keboola/serverless-demo-app/blob/master/test/func.spec.js).
 
 If your handler use other AWS resources, you should check their state in your test. Add permissions to the resources to `FunctionalTestPolicy` in [cf-stack.json](https://github.com/keboola/serverless-demo-app/blob/master/cf-stack.json).
 
@@ -178,7 +176,7 @@ If your handler use other AWS resources, you should check their state in your te
 1. Download git repository: `git clone git@github.com:keboola/serverless-demo-app.git`
 2. Create a stack [cf-stack.json](https://github.com/keboola/serverless-demo-app/blob/master/cf-stack.json) with IAM policies and user groups for deployment and functional testing. You will need to fill parameters:
     - `ServiceName` - should be the same as `SERVICE_NAME` env var (e.g. `dev-serverless-demo-app`)
-    - `KeboolaStack` - should be the same as `KEBOOLA_STACK` env var (e.g. `serverless-demo-app`)
+    - `KeboolaStack` - should be the same as `KEBOOLA_STACK_TAG` env var (e.g. `serverless-demo-app`)
     - `Stage` - one of: `dev`, `test`, `prod` (again, should be the same as `STAGE` env var)
 3. Create an IAM user for deployment (e.g. `serverless-demo-app-deploy`) and assign it to the group created in previous step. Create AWS credentials.
 4. Create an IAM user for testing (e.g. `serverless-demo-app-testing`) and assign it to the group created in previous step. Create AWS credentials.

@@ -1,7 +1,5 @@
 sudo: true
-
 language: bash
-
 services:
   - docker
 
@@ -33,7 +31,8 @@ jobs:
         - docker pull "${ECR_REGISTRY}:${ECR_TAG}"
       script:
         - docker run --rm "${ECR_REGISTRY}:${ECR_TAG}" yarn test:lint
-    - stage: unit tests
+
+    - stage: unit and integration tests
       before_script:
         - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
         - docker pull "${ECR_REGISTRY}:${ECR_TAG}"
@@ -55,13 +54,13 @@ jobs:
           docker run --rm
           -e "AWS_ACCESS_KEY_ID=${CI_DEPLOY_AWS_ACCESS_KEY_ID}"
           -e "AWS_SECRET_ACCESS_KEY=${CI_DEPLOY_AWS_SECRET_ACCESS_KEY}"
-          -e "CLOUDFORMATION_ROLE_ARN=${CI_CLOUDFORMATION_ROLE_ARN}"
-          -e "LAMBDA_EXECUTION_ROLE_ARN=${CI_LAMBDA_EXECUTION_ROLE_ARN}"
-          -e "KEBOOLA_STACK=${CI_KEBOOLA_STACK}"
-          -e "REGION=${CI_REGION}"
-          -e "SERVICE_NAME=${CI_SERVICE_NAME}"
+          -e "CLOUDFORMATION_ROLE_ARN=arn:aws:iam::061240556736:role/ci-serverless-demo-app-us-east-1-sls-cf"
+          -e "LAMBDA_EXECUTION_ROLE_ARN=arn:aws:iam::061240556736:role/ci-serverless-demo-app-us-east-1-sls-exec"
+          -e "KEBOOLA_STACK_TAG=serverless-demo-app"
+          -e "REGION=us-east-1"
+          -e "SERVICE_NAME=ci-serverless-demo-app"
           -e "STAGE=test"
-          "${ECR_REGISTRY}:${ECR_TAG}" serverless deploy
+          "${ECR_REGISTRY}:${ECR_TAG}" serverless deploy --force
 
     - stage: functional tests
       before_script:
@@ -70,28 +69,28 @@ jobs:
       script:
         - >-
           docker run --rm
-          -e "API_ENDPOINT=${CI_API_ENDPOINT}"
-          -e "AWS_ACCESS_KEY_ID=${CI_TEST_AWS_ACCESS_KEY_ID}"
-          -e "AWS_SECRET_ACCESS_KEY=${CI_TEST_AWS_SECRET_ACCESS_KEY}"
-          -e "REGION=${CI_REGION}"
-          -e "SERVICE_NAME=${CI_SERVICE_NAME}"
+          -e "API_ENDPOINT=https://l51snajwd5.execute-api.us-east-1.amazonaws.com/test"
+          -e "AWS_ACCESS_KEY_ID=${TEST_AWS_ACCESS_KEY_ID}"
+          -e "AWS_SECRET_ACCESS_KEY=${TEST_AWS_SECRET_ACCESS_KEY}"
+          -e "REGION=us-east-1"
+          -e "SERVICE_NAME=ci-serverless-demo-app"
           -e "STAGE=test"
           "${ECR_REGISTRY}:${ECR_TAG}" yarn test:func
 
-    - stage: deploy to production
-      before_script:
-        - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
-        - docker pull "${ECR_REGISTRY}:${ECR_TAG}"
-      script:
-        - >-
-          docker run --rm
-          -e "AWS_ACCESS_KEY_ID=${PROD_DEPLOY_AWS_ACCESS_KEY_ID}"
-          -e "AWS_SECRET_ACCESS_KEY=${PROD_DEPLOY_AWS_SECRET_ACCESS_KEY}"
-          -e "CLOUDFORMATION_ROLE_ARN=${PROD_CLOUDFORMATION_ROLE_ARN}"
-          -e "LAMBDA_EXECUTION_ROLE_ARN=${PROD_LAMBDA_EXECUTION_ROLE_ARN}"
-          -e "KEBOOLA_STACK=${PROD_KEBOOLA_STACK}"
-          -e "REGION=${PROD_REGION}"
-          -e "SERVICE_NAME=${PROD_SERVICE_NAME}"
-          -e "STAGE=prod"
-          "${ECR_REGISTRY}:${ECR_TAG}" serverless deploy
-      if: (branch = master) AND (tag IS present)
+#    - stage: deploy to production
+#      before_script:
+#        - eval $(docker run --rm -i -e AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY quay.io/keboola/aws-cli ecr get-login --region us-east-1 --no-include-email)
+#        - docker pull "${ECR_REGISTRY}:${ECR_TAG}"
+#      script:
+#        - >-
+#          docker run --rm
+#          -e "AWS_ACCESS_KEY_ID=${PROD_DEPLOY_AWS_ACCESS_KEY_ID}"
+#          -e "AWS_SECRET_ACCESS_KEY=${PROD_DEPLOY_AWS_SECRET_ACCESS_KEY}"
+#          -e "CLOUDFORMATION_ROLE_ARN="
+#          -e "LAMBDA_EXECUTION_ROLE_ARN="
+#          -e "KEBOOLA_STACK_TAG=serverless-demo-app"
+#          -e "REGION=us-east-1"
+#          -e "SERVICE_NAME=serverless-demo-app"
+#          -e "STAGE=prod"
+#          "${ECR_REGISTRY}:${ECR_TAG}" serverless deploy --force
+#      if: (branch = master)

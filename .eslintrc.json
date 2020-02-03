@@ -3,11 +3,10 @@
     "@keboola/node"
   ],
   "plugins": [
-    "import",
-    "jest"
+    "import"
   ],
   "env": {
     "node": true,
-    "jest/globals": true
+    "mocha": true
   }
 }

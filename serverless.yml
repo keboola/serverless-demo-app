@@ -18,24 +18,29 @@ custom:
       - X-Amz-User-Agent
     allowCredentials: false
 
-plugins:
-  - serverless-webpack
-
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs12.x
   region: ${env:REGION}
   stage: ${env:STAGE}
   memorySize: 128
-  timeout: 30
+  timeout: 60
   versionFunctions: false
+  tracing:
+    apiGateway: true
+    lambda: true
   deploymentBucket:
     name: "${env:SERVICE_NAME}-${env:REGION}-deployment"
   cfnRole: ${env:CLOUDFORMATION_ROLE_ARN}
   role: ${env:LAMBDA_EXECUTION_ROLE_ARN}
   stackTags:
-    KeboolaStack: ${env:KEBOOLA_STACK}
+    KeboolaStack: ${env:KEBOOLA_STACK_TAG}
   environment:
+
+plugins:
+  - '@keboola/serverless-default-error-responses'
+  - serverless-offline
+  - serverless-webpack
 
 package:
   individually: true
@@ -64,10 +69,9 @@ functions:
   handler:
     handler: src/lambda.handler
     tags:
-      KeboolaStack: ${env:KEBOOLA_STACK}
+      KeboolaStack: ${env:KEBOOLA_STACK_TAG}
     events:
-      -
-        http:
+      - http:
           method: get
           path: "/"
           cors: ${self:custom.cors}

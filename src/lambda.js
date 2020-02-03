@@ -1,7 +1,8 @@
+import errorLogger from '@keboola/middy-error-logger';
 import bluebird from 'bluebird';
 import middy from 'middy';
+import { cors } from 'middy/middlewares';
 import { install } from 'source-map-support';
-import errorLogger from '@keboola/middy-error-logger';
 
 // Webpack does not want to require @babel/runtime required by @keboola/middy-error-logger
 // so we enforce it to require manually
@@ -19,4 +20,5 @@ const handlerFunction = () => {
 
 // eslint-disable-next-line
 export const handler = middy(handlerFunction)
-  .use(errorLogger());
+  .use(errorLogger())
+  .use(cors());
