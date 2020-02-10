@@ -176,7 +176,7 @@ If your handler use other AWS resources, you should check their state in your te
 3. Create an IAM user for deployment (e.g. `serverless-demo-app-deploy`) and assign it to the group created in previous step. Create AWS credentials.
 4. Create an IAM user for testing (e.g. `serverless-demo-app-testing`) and assign it to the group created in previous step. Create AWS credentials.
 5. Create `.env` file from template [.env.template](https://github.com/keboola/serverless-demo-app/blob/master/.env.template)
-6. Run `docker-compose run --rm dev-deploy`
+6. Run `docker-compose run --rm deploy`
 
 ## CI and deployment
 
