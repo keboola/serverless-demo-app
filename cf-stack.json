@@ -89,16 +89,6 @@
                 { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/restapis/*" },
                 { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/tags/*" }
               ]
-            },
-            {
-              "Sid": "RemoveAfterDeploy",
-              "Effect": "Allow",
-              "Action": [
-                "iam:*"
-              ],
-              "Resource": [
-                { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${ServiceName}-${AWS::Region}-lambda-role" }
-              ]
             }
           ]
         }
@@ -191,7 +181,6 @@
               "Effect": "Allow",
               "Action": [
                 "logs:DescribeLogGroups",
-                "cloudtrail:DescribeTrails",
                 "s3:ListAllMyBuckets"
               ],
               "Resource": "*"
@@ -204,18 +193,6 @@
               "Resource": [
                 { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/restapis" },
                 { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/restapis/*" }
-              ]
-            },
-
-
-            {
-              "Sid": "RemoveAfterDeploy",
-              "Effect": "Allow",
-              "Action": [
-                "iam:*"
-              ],
-              "Resource": [
-                { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${ServiceName}-${AWS::Region}-lambda-role" }
               ]
             }
           ]
@@ -281,15 +258,6 @@
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
-            {
-              "Effect": "Allow",
-              "Action": [
-                "logs:*"
-              ],
-              "Resource": [
-                { "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ServiceName}*" }
-              ]
-            },
             {
               "Effect": "Allow",
               "Action": [
