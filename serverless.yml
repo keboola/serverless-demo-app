@@ -1,3 +1,5 @@
+org: keboola
+app: serverless-demo-app
 service: ${env:SERVICE_NAME}
 
 custom:
