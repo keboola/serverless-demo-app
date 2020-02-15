@@ -115,7 +115,8 @@
               "Effect": "Allow",
               "Principal": {
                 "Service": [
-                  "cloudformation.amazonaws.com"
+                  "cloudformation.amazonaws.com",
+                  "lambda.amazonaws.com"
                 ]
               },
               "Action": [
@@ -165,7 +166,18 @@
                 "iam:PassRole"
               ],
               "Resource": [
-                { "Fn::GetAtt": ["ServerlessLambdaExecutionRole", "Arn"] }
+                { "Fn::GetAtt": ["ServerlessLambdaExecutionRole", "Arn"] },
+                { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${ServiceName}-${AWS::Region}-sls-cf" }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "iam:*"
+              ],
+              "Resource": [
+                { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${ServiceName}-*" },
+                { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/serverlessApiGatewayCloudWatchRole" }
               ]
             },
             {
@@ -174,12 +186,14 @@
                 "logs:*"
               ],
               "Resource": [
-                { "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ServiceName}*" }
+                { "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ServiceName}*" },
+                { "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/api-gateway/${ServiceName}-*" }
               ]
             },
             {
               "Effect": "Allow",
               "Action": [
+                "iam:ListAttachedRolePolicies",
                 "logs:DescribeLogGroups",
                 "s3:ListAllMyBuckets"
               ],
@@ -192,7 +206,8 @@
               ],
               "Resource": [
                 { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/restapis" },
-                { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/restapis/*" }
+                { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/restapis/*" },
+                { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}::/account" }
               ]
             }
           ]

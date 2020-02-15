@@ -9,6 +9,13 @@ services:
     volumes:
       - .:/code:cached
     working_dir: /code
+    environment:
+      - "CLOUDFORMATION_ROLE_ARN=dummyArn"
+      - "LAMBDA_EXECUTION_ROLE_ARN=dummyArn"
+      - "KEBOOLA_STACK_TAG=serverless-demo-app"
+      - "REGION=us-east-1"
+      - "SERVICE_NAME=dev-serverless-demo-app"
+      - "STAGE=dev"
 
   deploy:
     image: keboola/serverless-demo-app
