@@ -13,7 +13,7 @@
     "@keboola/middy-error-logger": "^1.0.1",
     "aws-xray-sdk": "^2.5.0",
     "http-errors": "^1.7.1",
-    "lodash": "^4.17.13",
+    "lodash": "^4.17.19",
     "middy": "^0.33.2",
     "source-map-support": "^0.5.9"
   },
