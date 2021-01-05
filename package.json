@@ -25,7 +25,7 @@
     "@keboola/eslint-config-node": "^2.0.0",
     "@keboola/serverless-default-error-responses": "^1.0.0",
     "aws-sdk": "^2.458.0",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.4",
